@@ -1,0 +1,3294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Case PS — Contabilizei</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    /* ── Reset & base ── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --green-primary: #00C16E;
+      --green-dark: #009A57;
+      --green-light: #D6F5E8;
+      --gray-900: #1A1A1A;
+      --gray-700: #3D3D3D;
+      --gray-500: #737373;
+      --gray-300: #BDBDBD;
+      --gray-100: #F5F5F5;
+      --white: #FFFFFF;
+      --nav-width: 220px;
+      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--gray-700);
+      background: var(--gray-100);
+      min-height: 100vh;
+    }
+
+    /* ── Nav lateral fixa ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--nav-width);
+      height: 100vh;
+      background: var(--gray-900);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 0 1.5rem;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    nav .nav-logo {
+      padding: 0 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--gray-700);
+      margin-bottom: 1rem;
+    }
+
+    nav .nav-logo span {
+      display: block;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-300);
+      margin-bottom: 0.25rem;
+    }
+
+    nav .nav-logo strong {
+      font-size: 1rem;
+      color: var(--green-primary);
+    }
+
+    nav ul {
+      list-style: none;
+      flex: 1;
+    }
+
+    nav ul li a {
+      display: block;
+      padding: 0.65rem 1.25rem;
+      color: var(--gray-300);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border-left: 3px solid transparent;
+      transition: color 0.18s, border-color 0.18s, background 0.18s;
+    }
+
+    nav ul li a:hover,
+    nav ul li a.active {
+      color: var(--white);
+      background: rgba(0, 193, 110, 0.08);
+      border-left-color: var(--green-primary);
+    }
+
+    nav .nav-footer {
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid var(--gray-700);
+      font-size: 0.72rem;
+      color: var(--gray-500);
+    }
+
+    /* ── Conteúdo principal ── */
+    main {
+      margin-left: var(--nav-width);
+      padding: 2.5rem 3rem;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4rem;
+    }
+
+    .container>section {
+      width: 100%;
+    }
+
+    section {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 2.5rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+      min-height: 200px;
+    }
+
+    section h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--green-primary);
+      display: inline-block;
+    }
+
+    /* ── Utilitários de grid para gráficos (uso futuro) ── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .kpi-card {
+      background: var(--gray-100);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      border-left: 4px solid var(--green-primary);
+    }
+
+    .kpi-card .label {
+      font-size: 0.78rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .kpi-card .value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .context-lead {
+      max-width: 980px;
+      margin-bottom: 1.5rem;
+      font-size: 1.02rem;
+    }
+
+    .thesis-card {
+      background: var(--gray-900);
+      color: var(--white);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.75rem;
+      border-left: 4px solid var(--green-primary);
+    }
+
+    .thesis-card .label {
+      display: block;
+      color: var(--green-primary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .thesis-card p {
+      color: var(--white);
+      font-size: 1.08rem;
+      line-height: 1.55;
+    }
+
+    .executive-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .executive-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-left: 5px solid var(--green-primary);
+      border-radius: 8px;
+      padding: 1.15rem 1.25rem;
+      min-height: 260px;
+    }
+
+    .executive-card h3 {
+      color: var(--gray-900);
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+
+    .executive-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border-radius: 999px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .executive-card ul {
+      margin-left: 1.05rem;
+      color: var(--gray-700);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .executive-card li+li {
+      margin-top: 0.35rem;
+    }
+
+    .executive-card a {
+      margin-top: auto;
+      color: var(--green-dark);
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .executive-card a:hover {
+      text-decoration: underline;
+    }
+
+    .section-subtitle {
+      color: var(--gray-900);
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 1.75rem 0 0.8rem;
+    }
+
+    .table-wrap {
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-bottom: 1.75rem;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+      font-size: 0.86rem;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 0.72rem 0.8rem;
+      border-bottom: 1px solid #E8E8E8;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .data-table th:first-child,
+    .data-table td:first-child {
+      text-align: left;
+    }
+
+    .data-table thead th {
+      background: var(--gray-900);
+      color: var(--white);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .data-table tbody tr:nth-child(even) {
+      background: #FAFAFA;
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--green-light);
+    }
+
+    .chart-box {
+      background: var(--white);
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      min-height: 420px;
+      margin-bottom: 1.75rem;
+    }
+
+    .kpi-card .delta-note {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--gray-500);
+      font-size: 0.82rem;
+    }
+
+    .kpi-card.visual {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 128px;
+      gap: 0.9rem;
+      align-items: center;
+      min-height: 132px;
+      border-left-width: 5px;
+    }
+
+    .kpi-card.visual .value {
+      font-size: 1.65rem;
+      line-height: 1.15;
+      margin-top: 0.25rem;
+    }
+
+    .sparkline {
+      width: 128px;
+      height: 72px;
+    }
+
+    .metric-note {
+      max-width: 980px;
+      margin-bottom: 1.5rem;
+    }
+
+    .callout-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .callout-box {
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-left: 5px solid #F97316;
+      border-radius: 8px;
+      padding: 1.15rem 1.25rem;
+    }
+
+    .callout-box strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 0.96rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .callout-box p {
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    .comparison-table {
+      min-width: 1180px;
+      table-layout: fixed;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      text-align: left;
+      vertical-align: top;
+      white-space: normal;
+    }
+
+    .comparison-table th:first-child,
+    .comparison-table td:first-child {
+      width: 13%;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .comparison-table td {
+      line-height: 1.45;
+    }
+
+    .info-card-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .info-card {
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      padding: 1rem;
+      min-height: 170px;
+    }
+
+    .info-card strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 0.96rem;
+      line-height: 1.25;
+      margin-bottom: 0.45rem;
+    }
+
+    .info-card .signal {
+      display: inline-block;
+      color: var(--green-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.55rem;
+      text-transform: uppercase;
+    }
+
+    .info-card p {
+      color: var(--gray-700);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .opportunity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .opportunity-card {
+      background: var(--white);
+      border: 1px solid #E8E8E8;
+      border-left: 5px solid var(--green-primary);
+      border-radius: 8px;
+      padding: 1.15rem 1.25rem;
+    }
+
+    .opportunity-card strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 1rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .opportunity-card p {
+      font-size: 0.9rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .opportunity-card .market-signal {
+      color: var(--gray-900);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .timeline-step {
+      position: relative;
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-top: 5px solid var(--green-primary);
+      border-radius: 8px;
+      padding: 1.15rem 1.2rem;
+    }
+
+    .timeline-step strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 1rem;
+      margin-bottom: 0.55rem;
+    }
+
+    .timeline-step ul,
+    .blind-list {
+      padding-left: 1.1rem;
+    }
+
+    .timeline-step li,
+    .blind-list li {
+      margin-bottom: 0.4rem;
+    }
+
+    .direction {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 999px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .direction.up.good,
+    .direction.down.good {
+      color: #047857;
+      background: #D1FAE5;
+    }
+
+    .direction.up.bad,
+    .direction.down.bad {
+      color: #B91C1C;
+      background: #FEE2E2;
+    }
+
+    .direction-label.good {
+      color: #047857;
+      font-weight: 700;
+    }
+
+    .direction-label.bad {
+      color: #B91C1C;
+      font-weight: 700;
+    }
+
+    .chart-placeholder {
+      background: var(--gray-100);
+      border-radius: 6px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-300);
+      font-size: 0.85rem;
+    }
+
+    #simulador-funil {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      min-height: 0;
+    }
+
+    .simulator-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .simulator-controls {
+      display: grid;
+      gap: 1rem;
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .control-row {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .control-row label {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      color: var(--gray-900);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .control-row label span {
+      color: var(--green-dark);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .strategy-desc {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--gray-500);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .input-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 120px;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .input-pair input[type="range"] {
+      width: 100%;
+      accent-color: var(--green-primary);
+    }
+
+    .input-pair input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--gray-300);
+      border-radius: 6px;
+      padding: 0.45rem 0.55rem;
+      color: var(--gray-900);
+      font: inherit;
+    }
+
+    .simulator-output-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .simulator-chart-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.55fr);
+      gap: 1rem;
+    }
+
+    .simulator-chart-grid .chart-box {
+      margin-bottom: 0;
+    }
+
+    #simulador-6-share {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      min-height: 0;
+      margin-top: 2.5rem;
+    }
+
+    #simulador-elasticidade {
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0;
+      min-height: 0;
+      margin-top: 2.5rem;
+    }
+
+    .strategy-options {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .strategy-option {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0.65rem;
+      color: var(--gray-700);
+      font-size: 0.9rem;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+
+    .strategy-option input {
+      margin-top: 0.2rem;
+      accent-color: var(--green-primary);
+    }
+
+    .strategy-option strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 0.92rem;
+    }
+
+    .share-common-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: stretch;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .scenario-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: #FAFAFA;
+      border: 1px solid #E8E8E8;
+      border-top: 5px solid var(--green-primary);
+      border-radius: 8px;
+      padding: 1.15rem;
+    }
+
+    .scenario-card h4 {
+      color: var(--gray-900);
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .scenario-outputs {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .scenario-metric {
+      background: var(--white);
+      border: 1px solid #E8E8E8;
+      border-radius: 8px;
+      padding: 0.85rem;
+    }
+
+    .scenario-metric .label {
+      display: block;
+      color: var(--gray-500);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+    }
+
+    .scenario-metric .value {
+      color: var(--gray-900);
+      font-size: 1.3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .scenario-metric .note {
+      display: block;
+      color: var(--gray-500);
+      font-size: 0.8rem;
+      margin-top: 0.25rem;
+    }
+
+    .math-callout {
+      border-top: 1px solid #E8E8E8;
+      padding-top: 0.85rem;
+      font-size: 0.88rem;
+      color: var(--gray-700);
+    }
+
+    .math-callout strong {
+      display: block;
+      color: var(--gray-900);
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .math-callout code {
+      display: block;
+      margin-top: 0.25rem;
+      white-space: normal;
+    }
+
+    .math-callout dl {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      column-gap: 0.5rem;
+      row-gap: 0.15rem;
+      margin-top: 0.45rem;
+    }
+
+    .math-callout dt {
+      color: var(--gray-900);
+      font-weight: 700;
+    }
+
+    .kpi-card .note {
+      display: block;
+      color: var(--gray-500);
+      font-size: 0.8rem;
+      margin-top: 0.35rem;
+    }
+
+    .simulator-note {
+      color: var(--gray-700);
+      font-size: 0.92rem;
+      margin-bottom: 1rem;
+      max-width: 980px;
+    }
+
+    /* ── Rodapé ── */
+    .doc-footer {
+      margin-top: 1rem;
+      padding: 1.25rem 0 0;
+      border-top: 1px solid #E8E8E8;
+      color: var(--gray-500);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    /* ── Print ── */
+    @media print {
+
+      html,
+      body {
+        background: var(--white);
+        color: #000;
+      }
+
+      body {
+        display: block;
+      }
+
+      nav {
+        display: none;
+      }
+
+      main {
+        margin-left: 0;
+        padding: 0;
+        gap: 1.25rem;
+      }
+
+      section {
+        box-shadow: none;
+        border: 1px solid #E8E8E8;
+        padding: 1rem 1.25rem;
+        min-height: 0;
+        break-inside: auto;
+      }
+
+      h2,
+      h3,
+      .section-subtitle {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .kpi-card,
+      .thesis-card,
+      .callout-box,
+      .executive-card,
+      .info-card,
+      .opportunity-card,
+      .timeline-step,
+      .scenario-card,
+      .scenario-metric,
+      .simulator-controls,
+      .chart-box,
+      .table-wrap {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .simulator-layout,
+      .simulator-output-grid,
+      .simulator-chart-grid,
+      .scenario-grid,
+      .share-common-controls,
+      .callout-grid,
+      .executive-summary-grid,
+      .info-card-grid,
+      .opportunity-grid,
+      .timeline {
+        break-inside: avoid;
+      }
+
+      .chart-box {
+        min-height: 280px;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+    }
+
+    /* ── Responsividade básica ── */
+    @media (max-width: 768px) {
+      nav {
+        position: relative;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 1rem;
+      }
+
+      nav ul {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      main {
+        margin-left: 0;
+        padding: 1.25rem;
+      }
+
+      .container {
+        max-width: none;
+        gap: 2.5rem;
+      }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 1.5rem;
+      }
+
+      .kpi-card.visual {
+        grid-template-columns: 1fr;
+      }
+
+      .sparkline {
+        width: 100%;
+      }
+
+      .callout-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .executive-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-card-grid,
+      .opportunity-grid,
+      .timeline,
+      .simulator-layout,
+      .simulator-output-grid,
+      .simulator-chart-grid,
+      .share-common-controls,
+      .scenario-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .input-pair {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .scenario-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .scenario-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── Navegação lateral fixa ── -->
+  <nav>
+    <div class="nav-logo">
+      <span>Case PS</span>
+      <strong>Contabilizei</strong>
+    </div>
+    <ul>
+      <li><a href="#sumario-executivo">Sumário Executivo</a></li>
+      <li><a href="#p1-variacao-mercado">P1 — Mercado × Contabilizei</a></li>
+      <li><a href="#p2-indicadores">P2 — Indicadores básicos</a></li>
+      <li><a href="#p3-ineficiencias">P3 — Ineficiências do processo</a></li>
+      <li><a href="#p4-onde-focar">P4 — Onde focar esforços</a></li>
+      <li><a href="#p5-investimento-6pct">P5 — Investimento para 6% share</a></li>
+      <li><a href="#consideracoes-finais">Considerações finais</a></li>
+    </ul>
+    <div class="nav-footer">Lucas Puig · 2026</div>
+  </nav>
+
+  <!-- ── Conteúdo principal ── -->
+  <main>
+    <div class="container">
+
+      <section id="sumario-executivo">
+        <h2>Sumário Executivo</h2>
+        <p class="context-lead">
+          Esta análise responde às 5 perguntas da Descrição do desafio do case Contabilizei. Cada seção abaixo aprofunda
+          uma pergunta, com dados, gráficos e simuladores interativos.
+        </p>
+        <div class="executive-summary-grid" aria-label="Resumo executivo das cinco perguntas do case">
+          <article class="executive-card">
+            <h3>Pergunta 1: Mercado e Contabilizei</h3>
+            <span class="executive-badge">+1,39 p.p. de share, ao custo de +217% de CAC.</span>
+            <ul>
+              <li>Share saiu de 4,14% para 5,53% entre abr/21 e abr/22.</li>
+              <li>Vendas cresceram +22,6%, enquanto investimento subiu +288,9%.</li>
+              <li>A variação do mercado é sazonalidade estrutural do segmento, não ruído: CV ~14% entre pico de 60.500
+                aberturas em mai/21 e vale de 32.338 em dez/21.</li>
+            </ul>
+            <a href="#p1-variacao-mercado">Ver seção completa</a>
+          </article>
+
+          <article class="executive-card">
+            <h3>Pergunta 2: Indicadores básicos</h3>
+            <span class="executive-badge">Os KPIs mostram crescimento comprado com eficiência decrescente.</span>
+            <ul>
+              <li>CAC médio de R$ 256, máximo de R$ 362 e tendência de +R$ 18,84/mês.</li>
+              <li>Conversão Lead→Venda caiu de 29,6% para 22,8% (−6,8 p.p.) YoY.</li>
+              <li>CPL subiu de R$ 33,88 para R$ 82,81, com taxa de novos usuários em ~83%.</li>
+            </ul>
+            <a href="#p2-indicadores">Ver seção completa</a>
+          </article>
+
+          <article class="executive-card">
+            <h3>Pergunta 3: Ineficiências do processo</h3>
+            <span class="executive-badge">O gargalo é qualidade de lead, não volume de topo de funil.</span>
+            <ul>
+              <li>Usuários cresceram +44,6% e leads +59,1%, mas vendas só +22,6%.</li>
+              <li>Em jan/22, leads subiram +61,7% em um mês e a conversão caiu para 22,4%.</li>
+              <li>Correlação Investimento↔CAC de 0,934 indica que mais gasto compra custo, não eficiência.</li>
+            </ul>
+            <a href="#p3-ineficiencias">Ver seção completa</a>
+          </article>
+
+          <article class="executive-card">
+            <h3>Pergunta 4: Onde focar esforços</h3>
+            <span class="executive-badge">Foco em eficiência, B2B2C e MEI digital para crescer com baixo CAC
+              adicional.</span>
+            <ul>
+              <li>Recuperar 5 p.p. de conversão entrega ~500 vendas adicionais com ~11.700 leads/mês.</li>
+              <li>B2B2C usa canais como Mercado Livre, Shopee, Hotmart e Vivo Valoriza Empresas.</li>
+              <li>MEI digital amplia TAM com 2M influenciadores e R$ 67 bi em vendas online de MPEs.</li>
+            </ul>
+            <a href="#p4-onde-focar">Ver seção completa</a>
+          </article>
+
+          <article class="executive-card">
+            <h3>Pergunta 5: Investimento para 6% share</h3>
+            <span class="executive-badge">Há 4 caminhos para 6%: linear, realista, estratégico e sazonal.</span>
+            <ul>
+              <li>6% do mercado médio de ~53.091 aberturas exige ~3.180 vendas/mês.</li>
+              <li>O delta de ~500 vendas × CAC de R$ 362 gera ~R$ 181k/mês incremental.</li>
+              <li>No cenário realista, ε = 0,10 implica ~R$ 10,1M/ano incrementais.</li>
+              <li>O caminho sazonal realoca orçamento para meses de maior demanda para capturar share sem aumentar o
+                orçamento anual.</li>
+            </ul>
+            <a href="#p5-investimento-6pct">Ver seção completa</a>
+          </article>
+        </div>
+      </section>
+
+      <!-- Seção 2: Contexto do negócio e definição do problema -->
+      <section id="p1-variacao-mercado" data-legacy-id="contexto">
+        <h2>P1 — Mercado × Contabilizei</h2>
+        <h3 class="section-subtitle">Qual a variação que ocorreu com o mercado e com a Contabilizei no período? Como
+          eles se relacionam?</h3>
+        <p class="context-lead">
+          O mercado oscilou fortemente no período, com mínimo de 32.338 aberturas em dez/21 e máximo de 60.500 em
+          mai/21, enquanto a Contabilizei cresceu em topo de funil e em vendas: abr/21 contra abr/22 mostra usuários
+          +44,6%, leads +59,1%, vendas +22,6% e share de 4,14% para 5,53%. A relação não é linear: a empresa ganhou
+          participação mesmo com mercado volátil, mas o avanço veio com investimento +288,9% e CAC +217%, sinalizando
+          que o crescimento foi comprado com eficiência decrescente.
+        </p>
+
+        <h3 class="section-subtitle">Base mensal completa: abr/21 a abr/22</h3>
+        <div class="table-wrap">
+          <table class="data-table"
+            aria-label="Tabela mensal de mercado, funil, investimento, CAC, conversão e market share">
+            <thead>
+              <tr>
+                <th>Mês</th>
+                <th>Mercado</th>
+                <th>Usuários</th>
+                <th>Novos</th>
+                <th>Leads</th>
+                <th>Vendas</th>
+                <th>Investimento</th>
+                <th>CAC</th>
+                <th>Conv L→V</th>
+                <th>Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Abr/2021</td>
+                <td>52.888</td>
+                <td>1.038.285</td>
+                <td>860.141</td>
+                <td>7.392</td>
+                <td>2.190</td>
+                <td>R$ 250.407,39</td>
+                <td>R$ 114,34</td>
+                <td>29,63%</td>
+                <td>4,14%</td>
+              </tr>
+              <tr>
+                <td>Mai/2021</td>
+                <td>60.500</td>
+                <td>1.043.004</td>
+                <td>865.406</td>
+                <td>8.075</td>
+                <td>2.326</td>
+                <td>R$ 336.276,04</td>
+                <td>R$ 144,57</td>
+                <td>28,80%</td>
+                <td>3,84%</td>
+              </tr>
+              <tr>
+                <td>Jun/2021</td>
+                <td>56.658</td>
+                <td>995.580</td>
+                <td>813.582</td>
+                <td>9.273</td>
+                <td>2.310</td>
+                <td>R$ 381.262,39</td>
+                <td>R$ 165,05</td>
+                <td>24,91%</td>
+                <td>4,08%</td>
+              </tr>
+              <tr>
+                <td>Jul/2021</td>
+                <td>56.490</td>
+                <td>1.084.718</td>
+                <td>892.546</td>
+                <td>7.489</td>
+                <td>2.374</td>
+                <td>R$ 439.727,67</td>
+                <td>R$ 185,23</td>
+                <td>31,70%</td>
+                <td>4,20%</td>
+              </tr>
+              <tr>
+                <td>Ago/2021</td>
+                <td>60.082</td>
+                <td>1.419.330</td>
+                <td>1.195.234</td>
+                <td>8.921</td>
+                <td>2.488</td>
+                <td>R$ 724.186,37</td>
+                <td>R$ 291,07</td>
+                <td>27,89%</td>
+                <td>4,14%</td>
+              </tr>
+              <tr>
+                <td>Set/2021</td>
+                <td>52.080</td>
+                <td>1.470.623</td>
+                <td>1.231.490</td>
+                <td>8.730</td>
+                <td>2.306</td>
+                <td>R$ 620.353,18</td>
+                <td>R$ 269,02</td>
+                <td>26,41%</td>
+                <td>4,43%</td>
+              </tr>
+              <tr>
+                <td>Out/2021</td>
+                <td>56.637</td>
+                <td>1.380.065</td>
+                <td>1.147.967</td>
+                <td>8.378</td>
+                <td>2.057</td>
+                <td>R$ 547.077,52</td>
+                <td>R$ 265,96</td>
+                <td>24,55%</td>
+                <td>3,63%</td>
+              </tr>
+              <tr>
+                <td>Nov/2021</td>
+                <td>51.366</td>
+                <td>1.384.710</td>
+                <td>1.132.634</td>
+                <td>7.855</td>
+                <td>2.030</td>
+                <td>R$ 552.239,63</td>
+                <td>R$ 272,04</td>
+                <td>25,84%</td>
+                <td>3,95%</td>
+              </tr>
+              <tr>
+                <td>Dez/2021</td>
+                <td>32.338</td>
+                <td>1.156.736</td>
+                <td>949.588</td>
+                <td>7.645</td>
+                <td>1.906</td>
+                <td>R$ 573.339,02</td>
+                <td>R$ 300,81</td>
+                <td>24,93%</td>
+                <td>5,89%</td>
+              </tr>
+              <tr>
+                <td>Jan/2022</td>
+                <td>54.940</td>
+                <td>1.571.792</td>
+                <td>1.333.751</td>
+                <td>12.368</td>
+                <td>2.769</td>
+                <td>R$ 899.200,07</td>
+                <td>R$ 324,74</td>
+                <td>22,39%</td>
+                <td>5,04%</td>
+              </tr>
+              <tr>
+                <td>Fev/2022</td>
+                <td>49.571</td>
+                <td>1.500.872</td>
+                <td>1.244.169</td>
+                <td>11.118</td>
+                <td>2.574</td>
+                <td>R$ 821.752,87</td>
+                <td>R$ 319,25</td>
+                <td>23,15%</td>
+                <td>5,19%</td>
+              </tr>
+              <tr>
+                <td>Mar/2022</td>
+                <td>58.036</td>
+                <td>1.603.261</td>
+                <td>1.376.502</td>
+                <td>11.758</td>
+                <td>2.934</td>
+                <td>R$ 942.214,75</td>
+                <td>R$ 321,14</td>
+                <td>24,95%</td>
+                <td>5,06%</td>
+              </tr>
+              <tr>
+                <td>Abr/2022</td>
+                <td>48.602</td>
+                <td>1.501.622</td>
+                <td>1.242.901</td>
+                <td>11.759</td>
+                <td>2.686</td>
+                <td>R$ 973.711,54</td>
+                <td>R$ 362,51</td>
+                <td>22,84%</td>
+                <td>5,53%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="section-subtitle">Leads, vendas e investimento</h3>
+        <div id="contexto-linhas-funil-investimento" class="chart-box"
+          aria-label="Gráfico multimétrico de leads, vendas e investimento"></div>
+
+        <h3 class="section-subtitle">Variação YoY: Abr/2021 vs Abr/2022</h3>
+        <div class="grid-3">
+          <div class="kpi-card"><span class="label">Vendas</span>
+            <div class="value">+22,6%</div><span class="delta-note">2.190 → 2.686</span>
+          </div>
+          <div class="kpi-card"><span class="label">Leads</span>
+            <div class="value">+59,1%</div><span class="delta-note">7.392 → 11.759</span>
+          </div>
+          <div class="kpi-card"><span class="label">Usuários</span>
+            <div class="value">+44,6%</div><span class="delta-note">1.038.285 → 1.501.622</span>
+          </div>
+          <div class="kpi-card"><span class="label">Investimento</span>
+            <div class="value">+288,9%</div><span class="delta-note">R$ 250,4k → R$ 973,7k</span>
+          </div>
+          <div class="kpi-card"><span class="label">CAC</span>
+            <div class="value">+217%</div><span class="delta-note">R$ 114,34 → R$ 362,51</span>
+          </div>
+          <div class="kpi-card"><span class="label">Share</span>
+            <div class="value">+1,39 p.p.</div><span class="delta-note">4,14% → 5,53%</span>
+          </div>
+        </div>
+
+        <h3 class="section-subtitle">Leitura de sazonalidade: dez/21</h3>
+        <div class="callout-grid" aria-label="Leitura de sazonalidade de dezembro de 2021">
+          <div class="callout-box">
+            <strong>Dez/21: outlier de denominador</strong>
+            <p>O mercado atinge o mínimo do período, 32.338 aberturas, enquanto o share sobe ao máximo de 5,89%. O ganho
+              aparente de participação vem do denominador menor, não de expansão de vendas: vendas caem para 1.906 e o
+              CAC sobe para R$ 300,81.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção 3: Funil de conversão e KPIs principais -->
+      <section id="p2-indicadores" data-legacy-id="funil-kpis">
+        <h2>P2 — Indicadores básicos</h2>
+        <h3 class="section-subtitle">Analisando somente os dados da Contabilizei quais indicadores básicos você acha
+          importante analisar?</h3>
+        <p class="metric-note">
+          Os indicadores básicos são os que conectam aquisição, eficiência e conversão: CAC, CPL, conversão
+          Usuário→Lead, conversão Lead→Venda, conversão Usuário→Venda, taxa de novos usuários e market share. Em
+          conjunto, eles mostram que a Contabilizei aumentou audiência e leads, mas passou a pagar mais caro por cada
+          lead e cliente, enquanto a etapa Lead→Venda perdeu eficiência.
+        </p>
+
+        <h3 class="section-subtitle">KPIs principais com sparklines</h3>
+        <div class="grid-3">
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">CAC médio</span>
+              <div class="value">R$ 256,59</div>
+              <span class="delta-note">R$ 114,34 → R$ 362,51</span>
+            </div>
+            <div id="spark-cac" class="sparkline" aria-label="Sparkline mensal de CAC"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">CPL médio</span>
+              <div class="value">R$ 65,21</div>
+              <span class="delta-note">R$ 33,88 → R$ 82,81</span>
+            </div>
+            <div id="spark-cpl" class="sparkline" aria-label="Sparkline mensal de custo por lead"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Conv. Usuário→Lead</span>
+              <div class="value">0,71%</div>
+              <span class="delta-note">0,71% → 0,78%</span>
+            </div>
+            <div id="spark-conv-ul" class="sparkline" aria-label="Sparkline mensal de conversão usuário para lead">
+            </div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Conv. Lead→Venda</span>
+              <div class="value">26,00%</div>
+              <span class="delta-note">29,63% → 22,84%</span>
+            </div>
+            <div id="spark-conv-lv" class="sparkline" aria-label="Sparkline mensal de conversão lead para venda"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Conv. Usuário→Venda</span>
+              <div class="value">0,18%</div>
+              <span class="delta-note">0,21% → 0,18%</span>
+            </div>
+            <div id="spark-conv-uv" class="sparkline" aria-label="Sparkline mensal de conversão usuário para venda">
+            </div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Taxa novos usuários</span>
+              <div class="value">83,17%</div>
+              <span class="delta-note">81,72%–85,86%</span>
+            </div>
+            <div id="spark-novos-users" class="sparkline" aria-label="Sparkline mensal da taxa de novos usuários"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Market Share médio</span>
+              <div class="value">4,55%</div>
+              <span class="delta-note">4,14% → 5,53%</span>
+            </div>
+            <div id="spark-share" class="sparkline" aria-label="Sparkline mensal de market share"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Vendas/mês</span>
+              <div class="value">2.381</div>
+              <span class="delta-note">30.950 vendas no período</span>
+            </div>
+            <div id="spark-vendas" class="sparkline" aria-label="Sparkline mensal de vendas"></div>
+          </div>
+          <div class="kpi-card visual">
+            <div>
+              <span class="label">Investimento/mês</span>
+              <div class="value">R$ 620,1k</div>
+              <span class="delta-note">R$ 250,4k → R$ 973,7k</span>
+            </div>
+            <div id="spark-investimento" class="sparkline" aria-label="Sparkline mensal de investimento"></div>
+          </div>
+        </div>
+
+        <h3 class="section-subtitle">Métricas derivadas calculadas</h3>
+        <div class="table-wrap">
+          <table class="data-table" aria-label="Resumo estatístico das métricas derivadas">
+            <thead>
+              <tr>
+                <th>Métrica derivada</th>
+                <th>Fórmula</th>
+                <th>Mín</th>
+                <th>Máx</th>
+                <th>Média</th>
+                <th>Mediana</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CAC (R$)</td>
+                <td>Investimento / Vendas</td>
+                <td>114,34</td>
+                <td>362,51</td>
+                <td>256,59</td>
+                <td>272,04</td>
+              </tr>
+              <tr>
+                <td>Conv. Lead → Venda (%)</td>
+                <td>Vendas / Leads</td>
+                <td>22,39%</td>
+                <td>31,70%</td>
+                <td>26,00%</td>
+                <td>24,95%</td>
+              </tr>
+              <tr>
+                <td>Conv. Usuário → Lead (%)</td>
+                <td>Leads / Usuários</td>
+                <td>0,57%</td>
+                <td>0,93%</td>
+                <td>0,71%</td>
+                <td>0,71%</td>
+              </tr>
+              <tr>
+                <td>Conv. Usuário → Venda (%)</td>
+                <td>Vendas / Usuários</td>
+                <td>0,15%</td>
+                <td>0,23%</td>
+                <td>0,18%</td>
+                <td>0,18%</td>
+              </tr>
+              <tr>
+                <td>Market Share (%)</td>
+                <td>Vendas / Mercado Abertura</td>
+                <td>3,63%</td>
+                <td>5,89%</td>
+                <td>4,55%</td>
+                <td>4,20%</td>
+              </tr>
+              <tr>
+                <td>Taxa Novos Usuários (%)</td>
+                <td>Novos Usuários / Usuários</td>
+                <td>81,72%</td>
+                <td>85,86%</td>
+                <td>83,17%</td>
+                <td>82,90%</td>
+              </tr>
+              <tr>
+                <td>CPL — Custo por Lead (R$)</td>
+                <td>Investimento / Leads</td>
+                <td>33,88</td>
+                <td>82,81</td>
+                <td>65,21</td>
+                <td>71,06</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="section-subtitle">Tendências lineares mensais</h3>
+        <div class="table-wrap">
+          <table class="data-table" aria-label="Slopes mensais por KPI">
+            <thead>
+              <tr>
+                <th>Métrica</th>
+                <th>Tendência/mês</th>
+                <th>Direção</th>
+                <th>Leitura</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CAC</td>
+                <td>+R$ 18,84/mês</td>
+                <td><span class="direction up bad">↑</span></td>
+                <td><span class="direction-label bad">Piora de eficiência</span></td>
+              </tr>
+              <tr>
+                <td>CPL</td>
+                <td>+R$ 3,55/mês</td>
+                <td><span class="direction up bad">↑</span></td>
+                <td><span class="direction-label bad">Lead mais caro</span></td>
+              </tr>
+              <tr>
+                <td>Conv. Usuário→Lead</td>
+                <td>−0,001 p.p./mês</td>
+                <td><span class="direction down bad">↓</span></td>
+                <td><span class="direction-label bad">Topo estável, sem ganho estrutural</span></td>
+              </tr>
+              <tr>
+                <td>Conv. Lead→Venda</td>
+                <td>−0,56 p.p./mês</td>
+                <td><span class="direction down bad">↓</span></td>
+                <td><span class="direction-label bad">Queda de conversão</span></td>
+              </tr>
+              <tr>
+                <td>Conv. Usuário→Venda</td>
+                <td>−0,004 p.p./mês</td>
+                <td><span class="direction down bad">↓</span></td>
+                <td><span class="direction-label bad">Perda ponta a ponta</span></td>
+              </tr>
+              <tr>
+                <td>Taxa novos usuários</td>
+                <td>+0,11 p.p./mês</td>
+                <td><span class="direction up bad">↑</span></td>
+                <td><span class="direction-label bad">Dependência de aquisição nova</span></td>
+              </tr>
+              <tr>
+                <td>Market Share</td>
+                <td>+0,13 p.p./mês</td>
+                <td><span class="direction up good">↑</span></td>
+                <td><span class="direction-label good">Ganho de participação</span></td>
+              </tr>
+              <tr>
+                <td>Vendas</td>
+                <td>+37 un/mês</td>
+                <td><span class="direction up good">↑</span></td>
+                <td><span class="direction-label good">Crescimento de volume</span></td>
+              </tr>
+              <tr>
+                <td>Investimento</td>
+                <td>+R$ 55.715/mês</td>
+                <td><span class="direction up bad">↑</span></td>
+                <td><span class="direction-label bad">Escala mais cara</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="section-subtitle">Análise por período</h3>
+        <div class="table-wrap">
+          <table class="data-table"
+            aria-label="Resumo comparativo por período de vendas, CAC, conversão e investimento">
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Vendas/mês</th>
+                <th>CAC médio</th>
+                <th>Conv. L→V</th>
+                <th>Investimento/mês</th>
+                <th>Leitura</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Abr–Set/2021 (6 m)</td>
+                <td>2.332</td>
+                <td>R$ 194,88</td>
+                <td>28,22%</td>
+                <td>R$ 458.702</td>
+                <td>Base mais eficiente</td>
+              </tr>
+              <tr>
+                <td>Out–Dez/2021 (3 m)</td>
+                <td>1.998</td>
+                <td>R$ 279,60</td>
+                <td>25,11%</td>
+                <td>R$ 557.552</td>
+                <td>Queda sazonal e CAC maior</td>
+              </tr>
+              <tr>
+                <td>Jan–Abr/2022 (4 m)</td>
+                <td>2.741</td>
+                <td>R$ 331,91</td>
+                <td>23,33%</td>
+                <td>R$ 909.220</td>
+                <td>Maior volume, menor eficiência</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="metric-note">
+          O período final entrega o maior volume de vendas e participação, mas com CAC 70% acima do início e conversão
+          lead→venda quase 5 p.p. menor.
+        </p>
+
+        <h3 class="section-subtitle">Séries mensais com tendência linear</h3>
+        <div id="funil-kpis-tendencias" class="chart-box"
+          aria-label="Subplots de CAC, conversão lead para venda, market share e investimento com linhas de tendência">
+        </div>
+      </section>
+
+      <!-- Seção 4: Identificação e análise de anomalias nos dados -->
+      <section id="p3-ineficiencias" data-legacy-id="anomalias">
+        <h2>P3 — Ineficiências do processo</h2>
+        <h3 class="section-subtitle">Baseado nesses dados quais são possíveis ineficiências do processo?</h3>
+        <p class="metric-note">
+          As possíveis ineficiências estão no fundo do funil e na dependência de aquisição paga: janeiro de 2022 mostra
+          volume de leads crescendo mais rápido que vendas, a taxa de novos usuários fica estruturalmente perto de 83% e
+          o investimento cresce muito acima do resultado. O diagnóstico é que o ponto de melhora principal não é falta
+          de topo de funil, mas qualidade/intenção dos leads, priorização comercial e saturação do motor de mídia.
+        </p>
+
+        <h3 class="section-subtitle">Principais anomalias encontradas</h3>
+        <div class="callout-grid" aria-label="Lista de anomalias e inconsistências dos dados">
+          <div class="callout-box">
+            <strong>Jan/22: spike de leads</strong>
+            <p>Leads sobem +61,7% em um mês, mas a conversão lead→venda cai ao mínimo de 22,39%, sugerindo piora de
+              qualidade, mudança de captura ou lag de pipeline.</p>
+          </div>
+          <div class="callout-box">
+            <strong>Novos usuários: ~83% estrutural</strong>
+            <p>A taxa fica consistentemente entre 81,7% e 85,9%, indicando aquisição quase sempre nova e baixa
+              recorrência de visitantes no ambiente de aquisição.</p>
+          </div>
+          <div class="callout-box">
+            <strong>Crescimento assimétrico</strong>
+            <p>De Abr/21 a Abr/22, investimento cresce +288,9% contra apenas +22,6% em vendas. A elasticidade implícita
+              sugere rendimento marginal decrescente.</p>
+          </div>
+        </div>
+
+        <h3 class="section-subtitle">Correlação entre variáveis críticas</h3>
+        <div id="anomalias-heatmap-correlacao" class="chart-box"
+          aria-label="Heatmap de correlação entre investimento, usuários, leads, vendas e CAC"></div>
+
+        <section id="simulador-funil" aria-labelledby="simulador-funil-title">
+          <h3 id="simulador-funil-title" class="section-subtitle">Simulador 1 — Funil de Conversão</h3>
+
+          <div class="simulator-layout">
+            <div class="simulator-controls" aria-label="Controles do simulador de funil">
+              <div class="control-row">
+                <label for="funil-usuarios-range">
+                  Usuários/mês
+                  <span id="funil-usuarios-current">1.501.622</span>
+                </label>
+                <div class="input-pair">
+                  <input id="funil-usuarios-range" type="range" min="500000" max="3000000" step="1" value="1501622"
+                    data-sim-input="usuarios" />
+                  <input id="funil-usuarios-number" type="number" min="500000" max="3000000" step="1" value="1501622"
+                    data-sim-input="usuarios" />
+                </div>
+              </div>
+
+              <div class="control-row">
+                <label for="funil-conv-ul-range">
+                  Conv U→L %
+                  <span id="funil-conv-ul-current">0,78%</span>
+                </label>
+                <div class="input-pair">
+                  <input id="funil-conv-ul-range" type="range" min="0.3" max="2.0" step="0.01" value="0.78"
+                    data-sim-input="convUL" />
+                  <input id="funil-conv-ul-number" type="number" min="0.3" max="2.0" step="0.01" value="0.78"
+                    data-sim-input="convUL" />
+                </div>
+              </div>
+
+              <div class="control-row">
+                <label for="funil-conv-lv-range">
+                  Conv L→V %
+                  <span id="funil-conv-lv-current">22,84%</span>
+                </label>
+                <div class="input-pair">
+                  <input id="funil-conv-lv-range" type="range" min="10" max="40" step="0.1" value="22.84"
+                    data-sim-input="convLV" />
+                  <input id="funil-conv-lv-number" type="number" min="10" max="40" step="0.1" value="22.84"
+                    data-sim-input="convLV" />
+                </div>
+              </div>
+
+              <div class="control-row">
+                <label for="funil-mercado-range">
+                  Mercado mensal
+                  <span id="funil-mercado-current">48.602</span>
+                </label>
+                <div class="input-pair">
+                  <input id="funil-mercado-range" type="range" min="30000" max="80000" step="1" value="48602"
+                    data-sim-input="mercado" />
+                  <input id="funil-mercado-number" type="number" min="30000" max="80000" step="1" value="48602"
+                    data-sim-input="mercado" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="simulator-output-grid" aria-label="Resultados do simulador de funil">
+                <div class="kpi-card">
+                  <span class="label">Leads/mês</span>
+                  <div id="funil-leads-output" class="value">11.713</div>
+                </div>
+                <div class="kpi-card">
+                  <span class="label">Vendas/mês</span>
+                  <div id="funil-vendas-output" class="value">2.676</div>
+                </div>
+                <div class="kpi-card">
+                  <span class="label">Market share</span>
+                  <div id="funil-share-output" class="value">5,51%</div>
+                </div>
+              </div>
+
+              <div class="simulator-chart-grid">
+                <div id="funil-conversao-chart" class="chart-box"
+                  aria-label="Gráfico de funil Usuários, Leads e Vendas"></div>
+                <div id="funil-share-indicator" class="chart-box" aria-label="Indicador de Vendas sobre Mercado"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Seção 5: Benchmarks de mercado e panorama competitivo -->
+      <section id="p4-onde-focar" data-legacy-id="mercado-competicao recomendacao">
+        <h2>P4 — Onde focar esforços</h2>
+        <h3 class="section-subtitle">Avaliando todos os dados Mercado e Contabilizei, onde você focaria esforços para
+          melhorar os resultados?</h3>
+        <p class="context-lead">
+          Uma alternativa a ser considerada seria priorizar a recuperação da eficiência do funil antes de uma eventual
+          expansão dos investimentos em mídia. A abertura de canais B2B2C poderia contribuir para a redução do CAC
+          incremental, enquanto o desenvolvimento de ofertas verticais — voltadas a MEI digital, IA fiscal e Reforma
+          Tributária — tenderia a posicionar a companhia em segmentos em transformação. Os dados sugerem que a
+          Contabilizei já opera com volume de aquisição relevante, ainda que com CAC em trajetória de alta. Nesse
+          contexto, parte significativa do impacto potencial pareceria advir da melhoria de conversão, da qualificação
+          da aquisição e de um uso mais intensivo de distribuição e parcerias, sobretudo nas frentes de mercado em maior
+          movimento
+        </p>
+        <div data-legacy-id="mercado-competicao">
+          <h3 class="section-subtitle">Mercado &amp; Competição</h3>
+          <p class="context-lead">
+            O mercado de contabilidade digital em 2026 combina mudança regulatória, novas fontes de demanda e
+            concorrentes adjacentes avançando pelas bordas da jornada PJ. A Contabilizei segue bem posicionada por unir
+            contabilidade, plataforma e banking, mas enfrenta pressão de ERPs, fintechs e incumbentes analógicos.
+          </p>
+
+          <h3 class="section-subtitle">7 concorrentes e adjacentes relevantes</h3>
+          <div class="table-wrap">
+            <table class="data-table comparison-table" aria-label="Tabela comparativa de concorrentes da Contabilizei">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Proposta</th>
+                  <th>Ticket</th>
+                  <th>Público</th>
+                  <th>Diferencial</th>
+                  <th>Ameaça / Oportunidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Conta Azul</td>
+                  <td>ERP de gestão financeira na nuvem para PME operar com seu próprio contador.</td>
+                  <td>R$ 160-R$ 720/mês; contabilidade não inclusa.</td>
+                  <td>MEI, ME e EPP com até R$ 4,8M de faturamento.</td>
+                  <td>Gestão mais robusta de estoque, CRM, financeiro e multiusuário.</td>
+                  <td>Ameaça substituir a assinatura de contabilidade online por ERP + contador externo; oportunidade de
+                    parceria ou conversão de usuários que ainda precisam de contador.</td>
+                </tr>
+                <tr>
+                  <td>Omie</td>
+                  <td>ERP online completo conectado a escritórios contábeis parceiros.</td>
+                  <td>A partir de R$ 99/mês no ERP; contabilidade cobrada pelo escritório parceiro.</td>
+                  <td>PMEs com operação mais complexa em comércio, serviços e indústria.</td>
+                  <td>Ecossistema B2B2C com módulos fiscais e rede de 10k+ contadores parceiros.</td>
+                  <td>Ameaça capturar PMEs antes da Contabilizei via ERP; oportunidade de aprender e disputar
+                    distribuição B2B2C.</td>
+                </tr>
+                <tr>
+                  <td>Nubank PJ</td>
+                  <td>Conta PJ digital gratuita, com UX simples e crédito para empreendedores.</td>
+                  <td>Conta gratuita; crédito a taxas de mercado.</td>
+                  <td>MEI, ME e pequenos empreendedores, sobretudo clientes PF do Nubank.</td>
+                  <td>Escala de distribuição de 100M+ clientes PF e alta confiança de marca.</td>
+                  <td>Ameaça direta ao Contabilizei.bank; oportunidade de uma base massiva de PJs que ainda precisa de
+                    solução contábil.</td>
+                </tr>
+                <tr>
+                  <td>Stone</td>
+                  <td>Conta PJ integrada à maquininha, cobranças, reserva remunerada e gestão financeira.</td>
+                  <td>Conta gratuita; monetização por serviços financeiros e transações.</td>
+                  <td>Pequenos e médios comerciantes com vendas presenciais.</td>
+                  <td>2,1M PJs ativos e estratégia de principalidade financeira.</td>
+                  <td>Ameaça reduzir relevância do banco da Contabilizei; oportunidade de parceria ou aquisição de
+                    clientes que precisam de contador.</td>
+                </tr>
+                <tr>
+                  <td>Cora</td>
+                  <td>Conta digital PJ gratuita com cobranças e fluxo de caixa simples.</td>
+                  <td>Gratuito no básico; Cora Pro por R$ 44,90/mês.</td>
+                  <td>MEI, ME e startups early-stage sensíveis a custo.</td>
+                  <td>Pix ilimitado, boletos gratuitos e parcerias com escritórios contábeis.</td>
+                  <td>Ameaça evoluir para contabilidade integrada via marketplace; oportunidade de replicar parcerias
+                    como canal de distribuição.</td>
+                </tr>
+                <tr>
+                  <td>BPO tradicional</td>
+                  <td>Terceirização contábil, fiscal e financeira com relacionamento consultivo.</td>
+                  <td>R$ 800-R$ 1.500/mês para ME/EPP; R$ 3.000-R$ 15.000+ para médias.</td>
+                  <td>Lucro Presumido/Real, EPPs e empresas com alta complexidade.</td>
+                  <td>Advisory tributário, societário e compliance premium com atendimento próximo.</td>
+                  <td>Ameaça nos clientes mais sofisticados; oportunidade de roubar mid-market com Experts e automação a
+                    custo menor.</td>
+                </tr>
+                <tr>
+                  <td>Autônomos</td>
+                  <td>Contador individual via indicação ou marketplace, com atendimento personalizado.</td>
+                  <td>R$ 150-R$ 450/mês para MEI/ME; projetos pontuais variáveis.</td>
+                  <td>MEI e ME que priorizam relação pessoal, preço e flexibilidade.</td>
+                  <td>Vínculo direto com o contador, personalização e preço competitivo em casos simples.</td>
+                  <td>Ameaça no MEI simples; oportunidade de converter uma base fragmentada que sofre para escalar com
+                    SLA e tecnologia.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="section-subtitle">5 tendências que mudam a equação de crescimento</h3>
+          <div class="info-card-grid" aria-label="Cards de tendências de mercado">
+            <div class="info-card">
+              <strong>Open Finance</strong>
+              <span class="signal">4 bi chamadas/semana</span>
+              <p>Infraestrutura já madura para consentimento, conciliação automática e scoring financeiro. O gargalo
+                passa a ser adesão corporativa das MPEs.</p>
+            </div>
+            <div class="info-card">
+              <strong>MEI Digital</strong>
+              <span class="signal">4,6M aberturas + 2M influenciadores</span>
+              <p>Marketplaces e creator economy criam MEIs com múltiplas fontes de receita, repasses e exigências
+                fiscais que o contador simples não atende bem.</p>
+            </div>
+            <div class="info-card">
+              <strong>IA contábil</strong>
+              <span class="signal">21% adoção fiscal</span>
+              <p>Há uso corporativo de IA em compliance, mas baixa adoção em rotinas fiscais do dia a dia. O espaço está
+                aberto para agentes especializados.</p>
+            </div>
+            <div class="info-card">
+              <strong>Reforma Tributária</strong>
+              <span class="signal">CBS/IBS em DF-e desde jan/2026</span>
+              <p>A transição até 2033 exige reclassificação fiscal, novos campos em documentos eletrônicos e orientação
+                contínua por CNAE e regime.</p>
+            </div>
+            <div class="info-card">
+              <strong>Consolidação</strong>
+              <span class="signal">M&amp;A +71% H1/2025</span>
+              <p>Setor contábil fragmentado, com 85k escritórios e baixa capacidade tecnológica, vira alvo natural para
+                aquisição de carteiras.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção 6: Recomendação estratégica e próximos passos -->
+        <div data-legacy-id="recomendacao">
+          <h3 class="section-subtitle">5 oportunidades estratégicas</h3>
+          <div class="opportunity-grid" aria-label="Cards de oportunidades estratégicas">
+            <div class="opportunity-card">
+              <strong>MEI digital</strong>
+              <p><b>Tese:</b> lançar um produto nativo para vendedores de marketplace e criadores, com integração de
+                repasses, emissão automática de NF, cálculo de DAS e conciliação em painel único.</p>
+              <p class="market-signal">Sinal de mercado: 2M influenciadores, R$ 67 bi em vendas online de MPEs e 4,6M
+                novos pequenos negócios em 2025.</p>
+            </div>
+            <div class="opportunity-card">
+              <strong>IA Reforma</strong>
+              <p><b>Tese:</b> criar agente de IA para diagnosticar impacto da Reforma Tributária por CNAE/regime,
+                sugerir reclassificações CBS/IBS e orientar atualização fiscal.</p>
+              <p class="market-signal">Sinal de mercado: só 21% das empresas usam IA em rotinas fiscais; DF-e com
+                CBS/IBS desde jan/2026 cria urgência imediata.</p>
+            </div>
+            <div class="opportunity-card">
+              <strong>Open Finance</strong>
+              <p><b>Tese:</b> puxar extratos via API com consentimento único, eliminar conciliação manual e usar dados
+                financeiros para scoring e crédito no Contabilizei.bank.</p>
+              <p class="market-signal">Sinal de mercado: Open Finance alcançou 4 bi chamadas por semana e PIX Automático
+                acelera cobranças recorrentes.</p>
+            </div>
+            <div class="opportunity-card">
+              <strong>B2B2C</strong>
+              <p><b>Tese:</b> oferecer BPO fiscal white-label via API para marketplaces, fintechs e plataformas de
+                creator economy que não querem construir contabilidade internamente.</p>
+              <p class="market-signal">Sinal de mercado: Mercado Livre, Shopee, Hotmart e fintechs têm bases PJ prontas;
+                Omie prova o valor da distribuição por parceiros.</p>
+            </div>
+            <div class="opportunity-card">
+              <strong>M&amp;A de carteiras</strong>
+              <p><b>Tese:</b> adquirir carteiras de escritórios tradicionais que não conseguirão acompanhar IA, Reforma
+                Tributária e obrigações digitais, migrando clientes com playbook assistido.</p>
+              <p class="market-signal">Sinal de mercado: 85k escritórios contábeis, M&amp;A +71% no H1/2025 e Warburg
+                Pincus como acionista com apetite por escala.</p>
+            </div>
+          </div>
+
+          <h3 class="section-subtitle">Plano de execução: 0-12 meses</h3>
+          <div class="timeline" aria-label="Timeline horizontal do plano de execução">
+            <div class="timeline-step">
+              <strong>0-30 dias</strong>
+              <ul>
+                <li>Auditar qualidade de lead por fonte de mídia.</li>
+                <li>Suspender ou redirecionar gasto em canais com CPL &gt; R$ 80 sem conversão comprovada.</li>
+                <li>Implementar scoring de intenção no CRM para priorizar lead quente no contato comercial.</li>
+              </ul>
+            </div>
+            <div class="timeline-step">
+              <strong>30-90 dias</strong>
+              <ul>
+                <li>Lançar piloto B2B2C com 1 plataforma, usando Shopee como candidata por parceria existente.</li>
+                <li>Construir v0 do produto MEI digital com API de repasse de marketplace.</li>
+                <li>Incluir emissão automática de NF e cálculo do DAS no fluxo inicial.</li>
+              </ul>
+            </div>
+            <div class="timeline-step">
+              <strong>3-12 meses</strong>
+              <ul>
+                <li>Lançar agente de IA para Reforma Tributária CBS/IBS como upsell regulatório.</li>
+                <li>Expandir B2B2C para 3+ plataformas.</li>
+                <li>Iniciar aquisição de carteiras de escritórios tradicionais via tese de M&amp;A de middle market.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Seção 8: Simuladores interativos (Plotly + inputs) -->
+      <section id="p5-investimento-6pct" data-legacy-id="recomendacao simuladores">
+        <h2>P5 — Investimento para 6% share</h2>
+        <h3 class="section-subtitle">Considerando que o mercado de abertura de empresa não tem variações grandes de
+          comportamento anualmente, qual seria o investimento necessário no cenário atual para atingir 6% de Market
+          Share? Explique o Racional da conta</h3>
+        <p class="context-lead">
+          No cálculo linear, usando mercado médio estável de 53.091 aberturas/mês, 6% exige cerca de 3.186 vendas/mês;
+          contra 2.686 vendas em abr/22, faltam ~500 vendas. Multiplicando esse delta pelo CAC atual de R$ 362,51, o
+          investimento incremental mínimo é de aproximadamente R$ 181 mil/mês ou R$ 2,17 milhões/ano, mas esse é um
+          piso: como investimento e CAC têm correlação 0,934, o caminho mais defensável é recuperar conversão e combinar
+          distribuição, não apenas comprar mídia adicional. Os 4 caminhos a seguir traduzem essa lógica em opções
+          concretas — linear, realista, estratégica e sazonal.
+        </p>
+
+        <h3 class="section-subtitle">4 caminhos para 6%</h3>
+        <div class="scenario-grid" aria-label="Quatro caminhos estratégicos para atingir 6% de market share">
+          <article class="scenario-card">
+            <h4>1. Linear</h4>
+            <p>Regra de três direta: ~500 vendas adicionais × CAC atual de R$ 362,51 = ~R$ 181 mil/mês incremental, ou
+              ~R$ 2,17 milhões/ano.</p>
+          </article>
+          <article class="scenario-card">
+            <h4>2. Realista</h4>
+            <p>Aplica a curva de CAC marginal crescente: CAC base × (vendas alvo ÷ vendas atuais)<sup>(1−ε)/ε</sup>.
+              Com ε = 0,10, as mesmas ~500 vendas exigem cerca de R$ 10,1 milhões/ano incrementais.</p>
+          </article>
+          <article class="scenario-card">
+            <h4>3. Estratégico</h4>
+            <p>Recuperar conversão Lead→Venda para ~27,8% com ~11,7k leads/mês leva a ~3,25k vendas, acima da meta de
+              6%, com menor dependência de investimento incremental.</p>
+          </article>
+          <article class="scenario-card">
+            <h4>4. Sazonal</h4>
+            <p>Realocar o orçamento atual (~R$ 8,06 mi/ano) proporcionalmente à sazonalidade do mercado: mais verba em
+              meses de pico (mai/21: 60,5k aberturas) e menos em vales (dez/21: 32,3k). Com γ ≈ 0,5 (CAC cai com
+              demanda), chega-se a ~6% sem investimento incremental.</p>
+          </article>
+        </div>
+
+        <section id="simulador-6-share" aria-labelledby="simulador-6-share-title">
+          <h3 id="simulador-6-share-title" class="section-subtitle">Simulador 2 — Quatro Caminhos para 6% Market Share
+          </h3>
+
+          <div class="share-common-controls simulator-controls"
+            aria-label="Controles comuns do simulador de market share">
+            <div class="control-row">
+              <label for="share-meta-range">
+                Meta share %
+                <span id="share-meta-current">6,0%</span>
+              </label>
+              <div class="input-pair">
+                <input id="share-meta-range" type="range" min="4" max="10" step="0.1" value="6"
+                  data-share-input="metaShare" />
+                <input id="share-meta-number" type="number" min="4" max="10" step="0.1" value="6"
+                  data-share-input="metaShare" />
+              </div>
+            </div>
+
+            <div class="control-row">
+              <label for="share-mercado-range">
+                Mercado mensal
+                <span id="share-mercado-current">53.091</span>
+              </label>
+              <div class="input-pair">
+                <input id="share-mercado-range" type="range" min="30000" max="80000" step="1" value="53091"
+                  data-share-input="mercadoMensal" />
+                <input id="share-mercado-number" type="number" min="30000" max="80000" step="1" value="53091"
+                  data-share-input="mercadoMensal" />
+              </div>
+            </div>
+
+            <div class="control-row">
+              <label for="share-vendas-atuais-range">
+                Vendas atuais
+                <span id="share-vendas-atuais-current">2.686</span>
+              </label>
+              <div class="input-pair">
+                <input id="share-vendas-atuais-range" type="range" min="1000" max="6000" step="1" value="2686"
+                  data-share-input="vendasAtuais" />
+                <input id="share-vendas-atuais-number" type="number" min="1000" max="6000" step="1" value="2686"
+                  data-share-input="vendasAtuais" />
+              </div>
+            </div>
+          </div>
+
+          <div class="scenario-grid" aria-label="Cenários para atingir a meta de market share">
+            <article class="scenario-card">
+              <h4>1. Linear</h4>
+              <div class="control-row">
+                <label for="share-linear-cac-range">
+                  CAC médio
+                  <span id="share-linear-cac-current">R$ 362</span>
+                </label>
+                <div class="input-pair">
+                  <input id="share-linear-cac-range" type="range" min="100" max="800" step="1" value="362"
+                    data-share-input="linearCac" />
+                  <input id="share-linear-cac-number" type="number" min="100" max="800" step="1" value="362"
+                    data-share-input="linearCac" />
+                </div>
+              </div>
+              <div class="scenario-outputs">
+                <div class="scenario-metric">
+                  <span class="label">Vendas alvo</span>
+                  <div id="share-linear-vendas-alvo" class="value">3.186</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental mensal</span>
+                  <div id="share-linear-invest-mensal" class="value">R$ 181.000</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental anual</span>
+                  <div id="share-linear-invest-anual" class="value">R$ 2.172.000</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="scenario-card">
+              <h4>2. Realista</h4>
+              <div class="control-row">
+                <label for="share-realista-cac-range">
+                  CAC médio
+                  <span id="share-realista-cac-current">R$ 362</span>
+                </label>
+                <div class="input-pair">
+                  <input id="share-realista-cac-range" type="range" min="100" max="800" step="1" value="362"
+                    data-share-input="realistaCac" />
+                  <input id="share-realista-cac-number" type="number" min="100" max="800" step="1" value="362"
+                    data-share-input="realistaCac" />
+                </div>
+              </div>
+              <div class="control-row">
+                <label for="share-elasticidade-range">
+                  Elasticidade observada
+                  <span id="share-elasticidade-current">0,10</span>
+                </label>
+                <div class="input-pair">
+                  <input id="share-elasticidade-range" type="range" min="0.05" max="1" step="0.001" value="0.10"
+                    data-share-input="elasticidade" />
+                  <input id="share-elasticidade-number" type="number" min="0.05" max="1" step="0.001" value="0.10"
+                    data-share-input="elasticidade" />
+                </div>
+              </div>
+              <div class="scenario-outputs">
+                <div class="scenario-metric">
+                  <span class="label">Vendas alvo</span>
+                  <div id="share-realista-vendas-alvo" class="value">3.186</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental mensal</span>
+                  <div id="share-realista-invest-mensal" class="value">R$ 841.272</div>
+                  <span id="share-realista-cac-marginal" class="note">CAC marginal: R$ 1.683</span>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental anual</span>
+                  <div id="share-realista-invest-anual" class="value">R$ 10.095.264</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="scenario-card">
+              <h4>3. Estratégico</h4>
+              <div class="control-row">
+                <label for="share-conv-alvo-range">
+                  Conv L→V alvo
+                  <span id="share-conv-alvo-current">27,8%</span>
+                </label>
+                <div class="input-pair">
+                  <input id="share-conv-alvo-range" type="range" min="22" max="35" step="0.1" value="27.8"
+                    data-share-input="convAlvo" />
+                  <input id="share-conv-alvo-number" type="number" min="22" max="35" step="0.1" value="27.8"
+                    data-share-input="convAlvo" />
+                </div>
+              </div>
+              <div class="control-row">
+                <label for="share-leads-atuais-range">
+                  Volume atual de leads
+                  <span id="share-leads-atuais-current">11.700</span>
+                </label>
+                <div class="input-pair">
+                  <input id="share-leads-atuais-range" type="range" min="5000" max="25000" step="1" value="11700"
+                    data-share-input="leadsAtuais" />
+                  <input id="share-leads-atuais-number" type="number" min="5000" max="25000" step="1" value="11700"
+                    data-share-input="leadsAtuais" />
+                </div>
+              </div>
+              <div class="scenario-outputs">
+                <div class="scenario-metric">
+                  <span class="label">Vendas alvo</span>
+                  <div id="share-estrategico-vendas-alvo" class="value">3.186</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Vendas via conversão alvo</span>
+                  <div id="share-estrategico-vendas-conv" class="value">3.253</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental</span>
+                  <div id="share-estrategico-invest-mensal" class="value">R$ 0</div>
+                  <span id="share-estrategico-invest-note" class="note">Meta coberta por eficiência de conversão.</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="scenario-card">
+              <h4>4. Sazonal</h4>
+              <div class="control-row">
+                <label for="sazonal-strategy-select">Estratégia de alocação</label>
+                <select id="sazonal-strategy-select" aria-label="Estratégia de alocação sazonal">
+                  <option value="atual">Atual</option>
+                  <option value="uniforme">Uniforme</option>
+                  <option value="proporcional" selected>Proporcional ao mercado</option>
+                </select>
+                <small id="sazonal-strategy-desc" class="strategy-desc">Mais verba nos meses de maior abertura.</small>
+              </div>
+
+              <div class="control-row">
+                <label for="sazonalidade-gamma-range">
+                  γ demanda → CAC
+                  <span id="sazonalidade-gamma-current">0,50</span>
+                </label>
+                <div class="input-pair">
+                  <input id="sazonalidade-gamma-range" type="range" min="0" max="1.5" step="0.05" value="0.5"
+                    data-share-input="sazonalGamma" />
+                  <input id="sazonalidade-gamma-number" type="number" min="0" max="1.5" step="0.05" value="0.5"
+                    data-share-input="sazonalGamma" />
+                </div>
+              </div>
+
+              <div class="scenario-outputs">
+                <div class="scenario-metric">
+                  <span class="label">Vendas alvo</span>
+                  <div id="share-sazonal-vendas-alvo" class="value">3.186</div>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Vendas via realocação</span>
+                  <div id="share-sazonal-vendas-realocacao" class="value">3.186</div>
+                  <span id="share-sazonal-vendas-note" class="note">Média mensal no orçamento atual.</span>
+                </div>
+                <div class="scenario-metric">
+                  <span class="label">Investimento incremental anual</span>
+                  <div id="share-sazonal-invest-anual" class="value">R$ 0</div>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="math-callout" aria-label="Legenda matemática dos cenários do simulador">
+            <strong>Legenda matemática</strong>
+            <p><em>Linear:</em> <code>Δ_invest = CAC_base × (V_alvo − V_atual)</code></p>
+            <p><em>Realista:</em> <code>CAC_marginal = CAC_base × (V_alvo / V_atual)^((1−ε)/ε)</code></p>
+            <p><em>Sazonal:</em> <code>CAC_mês = CAC_base × (Mercado_médio / Mercado_mês)^γ</code>
+              <code>Vendas_mês = Investimento_mês / CAC_mês</code></p>
+            <dl>
+              <dt>V_alvo</dt>
+              <dd>vendas necessárias para a meta de share</dd>
+              <dt>V_atual</dt>
+              <dd>vendas atuais observadas</dd>
+              <dt>ε</dt>
+              <dd>elasticidade investimento-vendas (baixa: 0,10)</dd>
+              <dt>γ</dt>
+              <dd>elasticidade do CAC em relação à demanda mensal</dd>
+            </dl>
+          </div>
+
+          <div id="share-investimento-anual-chart" class="chart-box"
+            aria-label="Gráfico de barras agrupadas de investimento anual incremental por cenário"></div>
+
+          <div class="simulator-chart-grid">
+            <div id="sazonalidade-alocacao-chart" class="chart-box"
+              aria-label="Gráfico de barras de investimento alocado e mercado mensal"></div>
+            <div id="sazonalidade-estrategias-chart" class="chart-box"
+              aria-label="Gráfico comparativo das estratégias de realocação sazonal"></div>
+          </div>
+        </section>
+
+        <section id="simulador-elasticidade" aria-labelledby="simulador-elasticidade-title">
+          <h3 id="simulador-elasticidade-title" class="section-subtitle">Simulador 3 — Sensibilidade Investimento × CAC
+          </h3>
+          <p class="simulator-note">
+            A correlação 0,934 entre Investimento e CAC mostra retornos decrescentes: se elasticidade fosse 1,0, dobrar
+            investimento dobraria vendas; com elasticidade ~0,1, dobrar gasto produz só ~7% mais vendas.
+          </p>
+
+          <div class="simulator-layout">
+            <div class="simulator-controls" aria-label="Controles do simulador de elasticidade de investimento e CAC">
+              <div class="control-row">
+                <label for="elasticidade-investimento-range">
+                  Investimento mensal
+                  <span id="elasticidade-investimento-current">R$ 974.000</span>
+                </label>
+                <div class="input-pair">
+                  <input id="elasticidade-investimento-range" type="range" min="250000" max="3000000" step="1000"
+                    value="974000" data-elasticidade-input="investimento" />
+                  <input id="elasticidade-investimento-number" type="number" min="250000" max="3000000" step="1000"
+                    value="974000" data-elasticidade-input="investimento" />
+                </div>
+              </div>
+
+              <div class="control-row">
+                <label for="elasticidade-range">
+                  Elasticidade
+                  <span id="elasticidade-current">0,10</span>
+                </label>
+                <div class="input-pair">
+                  <input id="elasticidade-range" type="range" min="0.05" max="1" step="0.05" value="0.1"
+                    data-elasticidade-input="elasticidade" />
+                  <input id="elasticidade-number" type="number" min="0.05" max="1" step="0.05" value="0.1"
+                    data-elasticidade-input="elasticidade" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="simulator-output-grid" aria-label="Resultados do simulador de elasticidade">
+                <div class="kpi-card">
+                  <span class="label">CAC projetado</span>
+                  <div id="elasticidade-cac-projetado" class="value">R$ 363</div>
+                </div>
+                <div class="kpi-card">
+                  <span class="label">CAC linear ingênuo</span>
+                  <div id="elasticidade-cac-linear" class="value">R$ 363</div>
+                </div>
+                <div class="kpi-card">
+                  <span class="label">Diferença vs linear</span>
+                  <div id="elasticidade-diferenca-linear" class="value">R$ 0</div>
+                </div>
+              </div>
+
+              <div id="elasticidade-investimento-cac-chart" class="chart-box"
+                aria-label="Scatter de Investimento por CAC com curva de elasticidade"></div>
+            </div>
+          </div>
+        </section>
+
+      </section>
+
+      <section id="consideracoes-finais">
+        <h2>Considerações finais</h2>
+        <h3 class="section-subtitle">Conclusão geral</h3>
+        <p class="context-lead">
+          A leitura consolidada é que a Contabilizei comprou +1,39 p.p. de market share triplicando o investimento em
+          marketing. O caminho para 6% e além, portanto, não está em acelerar o mesmo motor, mas em re-alavancar três
+          motores subutilizados: eficiência de funil, distribuição B2B2C e produtos verticais para o "novo MEI digital".
+        </p>
+        <p class="context-lead">
+          O dado mais importante não é o crescimento de vendas isolado, mas a assimetria entre esforço e resultado:
+          investimento +288,9% YoY, vendas +22,6%, CAC +217% e conversão Lead→Venda caindo de 29,6% para 22,8%. Isso
+          indica que a empresa já sabe comprar volume, mas está pagando caro por leads de menor produtividade ou por um
+          processo comercial que não captura o valor do topo de funil gerado.
+        </p>
+        <p class="context-lead">
+          A primeira alavanca prioritária é eficiência de funil, porque recuperar cerca de 5 p.p. de conversão com o
+          volume atual de leads aproxima a companhia de 6% sem depender de aumento relevante de orçamento. A segunda é
+          distribuição B2B2C, porque marketplaces, fintechs e plataformas de creator economy concentram públicos PJ com
+          necessidade fiscal recorrente e podem reduzir o CAC marginal ao deslocar parte da aquisição para parceiros.
+        </p>
+        <p class="context-lead">
+          A terceira alavanca é produto vertical para MEI digital, porque as tendências de mercado apontam para MEIs com
+          múltiplas fontes de receita, repasses de plataformas, emissão de notas e obrigações fiscais mais complexas. Em
+          paralelo, M&amp;A de carteiras de escritórios pode funcionar como motor não orgânico de aquisição,
+          especialmente em um setor fragmentado, pressionado por Reforma Tributária, IA e digitalização.
+        </p>
+
+        <h3 class="section-subtitle">Próximos tópicos para pesquisa</h3>
+        <div class="table-wrap">
+          <table class="data-table" aria-label="Próximos tópicos para pesquisa de growth">
+            <thead>
+              <tr>
+                <th>Tópico</th>
+                <th>Por que importa para a decisão de growth</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LTV e segmentação por valor de cliente</td>
+                <td>O CAC médio de R$ 256,59 e a alta de +217% só são sustentáveis se o LTV, por segmento e por coorte,
+                  justificar a aquisição incremental.</td>
+              </tr>
+              <tr>
+                <td>Breakdown de canal, origem do tráfego e ROAS pago</td>
+                <td>Como o dataset consolida o investimento, é preciso separar Google, Meta, SEO, indicação e parceiros
+                  para identificar onde há saturação e onde ainda existe escala eficiente.</td>
+              </tr>
+              <tr>
+                <td>Qualidade de lead por origem</td>
+                <td>A queda de conversão Lead→Venda enquanto leads crescem sugere mistura pior de origem, intenção ou
+                  qualificação; sem isso, a decisão entre cortar mídia e corrigir venda fica imprecisa.</td>
+              </tr>
+              <tr>
+                <td>Churn, MRR, ticket médio e expansão pós-venda</td>
+                <td>Em um modelo de assinatura contábil, o valor gerado depois da venda define se crescer share cria
+                  margem, destrói margem ou exige mudança de pricing.</td>
+              </tr>
+              <tr>
+                <td>Eficácia das parcerias B2B2C atuais</td>
+                <td>Medir conversão, CAC e retenção de canais como Shopee e Vivo Valoriza mostra se B2B2C já é um motor
+                  escalável ou apenas uma tese ainda não comprovada.</td>
+              </tr>
+              <tr>
+                <td>Benchmark de CAC contra Conta Azul e Omie</td>
+                <td>Comparar CAC, payback e canais dos concorrentes ajuda a entender se a ineficiência é específica da
+                  Contabilizei ou estrutural do mercado de contabilidade/ERP para MPEs.</td>
+              </tr>
+              <tr>
+                <td>Viabilidade técnica do produto vertical MEI digital</td>
+                <td>O sinal de 2M influenciadores, R$ 67 bi em vendas online de MPEs e múltiplas obrigações fiscais só
+                  vira vantagem se integrações com marketplaces, NF, DAS e conciliação couberem em um roadmap rápido.
+                </td>
+              </tr>
+              <tr>
+                <td>Curva de sazonalidade do mercado de abertura de empresas</td>
+                <td>Pesquisar séries longas (5+ anos) para confirmar se o padrão sazonal observado é recorrente e
+                  aplicável ao planejamento de investimento.</td>
+              </tr>
+              <tr>
+                <td>Modelo de M&amp;A de carteiras de escritórios</td>
+                <td>Com 85k escritórios, M&amp;A +71% no H1/2025 e stickiness fiscal, é necessário modelar preço por
+                  cliente, churn de migração e CAC equivalente para comparar aquisição orgânica vs. compra de carteira.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="doc-footer">
+        Fonte: Pesquisa/ — Análise: 2026-05-18.
+      </footer>
+
+    </div>
+  </main>
+
+  <script>
+    function initCasePS() {
+      const contextoMeses = ['Abr/2021', 'Mai/2021', 'Jun/2021', 'Jul/2021', 'Ago/2021', 'Set/2021', 'Out/2021', 'Nov/2021', 'Dez/2021', 'Jan/2022', 'Fev/2022', 'Mar/2022', 'Abr/2022'];
+      const contextoVendas = [2190, 2326, 2310, 2374, 2488, 2306, 2057, 2030, 1906, 2769, 2574, 2934, 2686];
+      const contextoLeads = [7392, 8075, 9273, 7489, 8921, 8730, 8378, 7855, 7645, 12368, 11118, 11758, 11759];
+      const contextoInvestimento = [250407.39, 336276.04, 381262.39, 439727.67, 724186.37, 620353.18, 547077.52, 552239.63, 573339.02, 899200.07, 821752.87, 942214.75, 973711.54];
+      const contextoMercado = [52888, 60500, 56658, 56490, 60082, 52080, 56637, 51366, 32338, 54940, 49571, 58036, 48602];
+      const funilCAC = [114.34, 144.57, 165.05, 185.23, 291.07, 269.02, 265.96, 272.04, 300.81, 324.74, 319.25, 321.14, 362.51];
+      const funilConvLeadVenda = [29.63, 28.80, 24.91, 31.70, 27.89, 26.41, 24.55, 25.84, 24.93, 22.39, 23.15, 24.95, 22.84];
+      const funilMarketShare = [4.14, 3.84, 4.08, 4.20, 4.14, 4.43, 3.63, 3.95, 5.89, 5.04, 5.19, 5.06, 5.53];
+      const funilCPL = [33.88, 41.64, 41.12, 58.72, 81.18, 71.06, 65.30, 70.30, 74.99, 72.70, 73.91, 80.13, 82.81];
+      const funilConvUsuarioLead = [0.71, 0.77, 0.93, 0.69, 0.63, 0.59, 0.61, 0.57, 0.66, 0.79, 0.74, 0.73, 0.78];
+      const funilConvUsuarioVenda = [0.21, 0.22, 0.23, 0.22, 0.18, 0.16, 0.15, 0.15, 0.16, 0.18, 0.17, 0.18, 0.18];
+      const funilTaxaNovosUsuarios = [82.84, 82.97, 81.72, 82.29, 84.21, 83.74, 83.18, 81.79, 82.09, 84.86, 82.90, 85.86, 82.77];
+
+      function linearTrend(values) {
+        const n = values.length;
+        const xs = values.map((_, index) => index + 1);
+        const avgX = xs.reduce((sum, value) => sum + value, 0) / n;
+        const avgY = values.reduce((sum, value) => sum + value, 0) / n;
+        const numerator = xs.reduce((sum, value, index) => sum + ((value - avgX) * (values[index] - avgY)), 0);
+        const denominator = xs.reduce((sum, value) => sum + ((value - avgX) ** 2), 0);
+        const slope = numerator / denominator;
+        const intercept = avgY - (slope * avgX);
+        return xs.map(value => intercept + (slope * value));
+      }
+
+      function plotSparkline(id, values, color, prefix = '', suffix = '') {
+        Plotly.newPlot(id, [{
+          x: contextoMeses,
+          y: values,
+          type: 'scatter',
+          mode: 'lines',
+          line: { color, width: 3, shape: 'spline' },
+          fill: 'tozeroy',
+          fillcolor: color === '#B91C1C' ? 'rgba(185, 28, 28, 0.10)' : 'rgba(0, 193, 110, 0.12)',
+          hovertemplate: `%{x}<br>${prefix}%{y:,.2f}${suffix}<extra></extra>`
+        }], {
+          margin: { t: 4, r: 4, b: 4, l: 4 },
+          xaxis: { visible: false, fixedrange: true },
+          yaxis: { visible: false, fixedrange: true },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          showlegend: false
+        }, { responsive: true, displayModeBar: false });
+      }
+
+      Plotly.newPlot('contexto-linhas-funil-investimento', [
+        {
+          x: contextoMeses,
+          y: contextoVendas,
+          name: 'Vendas',
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { color: '#00C16E', width: 3 },
+          marker: { size: 7 },
+          hovertemplate: '%{x}<br>Vendas: %{y:,.0f}<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: contextoLeads,
+          name: 'Leads',
+          type: 'scatter',
+          mode: 'lines+markers',
+          line: { color: '#2563EB', width: 3 },
+          marker: { size: 7 },
+          hovertemplate: '%{x}<br>Leads: %{y:,.0f}<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: contextoInvestimento,
+          name: 'Investimento',
+          type: 'scatter',
+          mode: 'lines+markers',
+          yaxis: 'y2',
+          line: { color: '#F97316', width: 3 },
+          marker: { size: 7 },
+          hovertemplate: '%{x}<br>Investimento: R$ %{y:,.2f}<extra></extra>'
+        }
+      ], {
+        margin: { t: 28, r: 72, b: 52, l: 64 },
+        legend: { orientation: 'h', x: 0, y: 1.12 },
+        xaxis: { tickangle: -30, fixedrange: true },
+        yaxis: {
+          title: 'Vendas e leads',
+          rangemode: 'tozero',
+          fixedrange: true,
+          gridcolor: '#E8E8E8'
+        },
+        yaxis2: {
+          title: 'Investimento (R$)',
+          overlaying: 'y',
+          side: 'right',
+          rangemode: 'tozero',
+          fixedrange: true,
+          tickprefix: 'R$ ',
+          tickformat: ',.0f'
+        },
+        hovermode: 'x unified',
+        paper_bgcolor: '#FFFFFF',
+        plot_bgcolor: '#FFFFFF',
+        font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+      }, { responsive: true, displayModeBar: false });
+
+      plotSparkline('spark-cac', funilCAC, '#B91C1C', 'R$ ');
+      plotSparkline('spark-cpl', funilCPL, '#B91C1C', 'R$ ');
+      plotSparkline('spark-conv-ul', funilConvUsuarioLead, '#2563EB', '', '%');
+      plotSparkline('spark-conv-lv', funilConvLeadVenda, '#B91C1C', '', '%');
+      plotSparkline('spark-conv-uv', funilConvUsuarioVenda, '#B91C1C', '', '%');
+      plotSparkline('spark-novos-users', funilTaxaNovosUsuarios, '#2563EB', '', '%');
+      plotSparkline('spark-share', funilMarketShare, '#00C16E', '', '%');
+      plotSparkline('spark-vendas', contextoVendas, '#00C16E');
+      plotSparkline('spark-investimento', contextoInvestimento.map(value => value / 1000), '#B91C1C', 'R$ ', 'k');
+
+      Plotly.newPlot('funil-kpis-tendencias', [
+        {
+          x: contextoMeses,
+          y: funilCAC,
+          name: 'CAC',
+          type: 'scatter',
+          mode: 'lines+markers',
+          xaxis: 'x',
+          yaxis: 'y',
+          line: { color: '#00C16E', width: 2.5 },
+          marker: { size: 6 },
+          hovertemplate: '%{x}<br>CAC: R$ %{y:,.2f}<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: linearTrend(funilCAC),
+          name: 'Tendência CAC',
+          type: 'scatter',
+          mode: 'lines',
+          xaxis: 'x',
+          yaxis: 'y',
+          line: { color: '#1A1A1A', width: 2, dash: 'dot' },
+          hoverinfo: 'skip',
+          showlegend: false
+        },
+        {
+          x: contextoMeses,
+          y: funilConvLeadVenda,
+          name: 'Conv. L→V',
+          type: 'scatter',
+          mode: 'lines+markers',
+          xaxis: 'x2',
+          yaxis: 'y2',
+          line: { color: '#2563EB', width: 2.5 },
+          marker: { size: 6 },
+          hovertemplate: '%{x}<br>Conv. L→V: %{y:,.2f}%<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: linearTrend(funilConvLeadVenda),
+          name: 'Tendência Conv. L→V',
+          type: 'scatter',
+          mode: 'lines',
+          xaxis: 'x2',
+          yaxis: 'y2',
+          line: { color: '#1A1A1A', width: 2, dash: 'dot' },
+          hoverinfo: 'skip',
+          showlegend: false
+        },
+        {
+          x: contextoMeses,
+          y: funilMarketShare,
+          name: 'Market Share',
+          type: 'scatter',
+          mode: 'lines+markers',
+          xaxis: 'x3',
+          yaxis: 'y3',
+          line: { color: '#F97316', width: 2.5 },
+          marker: { size: 6 },
+          hovertemplate: '%{x}<br>Share: %{y:,.2f}%<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: linearTrend(funilMarketShare),
+          name: 'Tendência Share',
+          type: 'scatter',
+          mode: 'lines',
+          xaxis: 'x3',
+          yaxis: 'y3',
+          line: { color: '#1A1A1A', width: 2, dash: 'dot' },
+          hoverinfo: 'skip',
+          showlegend: false
+        },
+        {
+          x: contextoMeses,
+          y: contextoInvestimento,
+          name: 'Investimento',
+          type: 'scatter',
+          mode: 'lines+markers',
+          xaxis: 'x4',
+          yaxis: 'y4',
+          line: { color: '#7C3AED', width: 2.5 },
+          marker: { size: 6 },
+          hovertemplate: '%{x}<br>Investimento: R$ %{y:,.2f}<extra></extra>'
+        },
+        {
+          x: contextoMeses,
+          y: linearTrend(contextoInvestimento),
+          name: 'Tendência Investimento',
+          type: 'scatter',
+          mode: 'lines',
+          xaxis: 'x4',
+          yaxis: 'y4',
+          line: { color: '#1A1A1A', width: 2, dash: 'dot' },
+          hoverinfo: 'skip',
+          showlegend: false
+        }
+      ], {
+        grid: { rows: 2, columns: 2, pattern: 'independent' },
+        margin: { t: 54, r: 34, b: 52, l: 64 },
+        legend: { orientation: 'h', x: 0, y: 1.12 },
+        annotations: [
+          { text: 'CAC mensal', x: 0.225, y: 1.0, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13, color: '#1A1A1A' } },
+          { text: 'Conv. Lead→Venda mensal', x: 0.785, y: 1.0, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13, color: '#1A1A1A' } },
+          { text: 'Market Share mensal', x: 0.225, y: 0.43, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13, color: '#1A1A1A' } },
+          { text: 'Investimento mensal', x: 0.785, y: 0.43, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13, color: '#1A1A1A' } }
+        ],
+        xaxis: { tickangle: -30, fixedrange: true },
+        xaxis2: { tickangle: -30, fixedrange: true },
+        xaxis3: { tickangle: -30, fixedrange: true },
+        xaxis4: { tickangle: -30, fixedrange: true },
+        yaxis: { title: 'R$', tickprefix: 'R$ ', fixedrange: true, gridcolor: '#E8E8E8' },
+        yaxis2: { title: '%', ticksuffix: '%', fixedrange: true, gridcolor: '#E8E8E8' },
+        yaxis3: { title: '%', ticksuffix: '%', fixedrange: true, gridcolor: '#E8E8E8' },
+        yaxis4: { title: 'R$', tickprefix: 'R$ ', tickformat: ',.0f', fixedrange: true, gridcolor: '#E8E8E8' },
+        hovermode: 'closest',
+        paper_bgcolor: '#FFFFFF',
+        plot_bgcolor: '#FFFFFF',
+        font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+      }, { responsive: true, displayModeBar: false });
+
+      const correlacaoLabels = ['Investimento', 'Usuários', 'Leads', 'Vendas', 'CAC'];
+      const correlacaoMatriz = [
+        [1.000, 0.906, 0.866, 0.716, 0.934],
+        [0.906, 1.000, 0.735, 0.585, 0.876],
+        [0.866, 0.735, 1.000, 0.864, 0.679],
+        [0.716, 0.585, 0.864, 1.000, 0.421],
+        [0.934, 0.876, 0.679, 0.421, 1.000]
+      ];
+
+      Plotly.newPlot('anomalias-heatmap-correlacao', [
+        {
+          x: correlacaoLabels,
+          y: correlacaoLabels,
+          z: correlacaoMatriz,
+          type: 'heatmap',
+          colorscale: [
+            [0, '#F7FBFF'],
+            [0.45, '#BFD7EA'],
+            [0.7, '#4F9BCB'],
+            [1, '#005A8D']
+          ],
+          zmin: 0.4,
+          zmax: 1,
+          text: correlacaoMatriz.map(row => row.map(value => value.toFixed(3).replace('.', ','))),
+          texttemplate: '%{text}',
+          textfont: { color: '#1A1A1A', size: 13 },
+          hovertemplate: '%{y} × %{x}<br>Correlação: %{z:.3f}<extra></extra>',
+          colorbar: { title: 'r', tickformat: '.2f' }
+        },
+        {
+          x: ['CAC', 'Investimento'],
+          y: ['Investimento', 'CAC'],
+          type: 'scatter',
+          mode: 'markers',
+          marker: {
+            symbol: 'square-open',
+            size: 74,
+            color: '#F97316',
+            line: { color: '#F97316', width: 4 }
+          },
+          hoverinfo: 'skip',
+          showlegend: false
+        }
+      ], {
+        margin: { t: 34, r: 36, b: 72, l: 96 },
+        annotations: [
+          {
+            text: 'Inv↔CAC = 0,934',
+            x: 'CAC',
+            y: 'Investimento',
+            ax: 46,
+            ay: -48,
+            arrowcolor: '#F97316',
+            arrowwidth: 2,
+            bgcolor: '#FFF7ED',
+            bordercolor: '#F97316',
+            borderpad: 4,
+            font: { color: '#9A3412', size: 13 }
+          }
+        ],
+        xaxis: { side: 'bottom', fixedrange: true },
+        yaxis: { autorange: 'reversed', fixedrange: true },
+        paper_bgcolor: '#FFFFFF',
+        plot_bgcolor: '#FFFFFF',
+        font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+      }, { responsive: true, displayModeBar: false });
+
+      const simulatorConfig = {
+        usuarios: {
+          range: document.getElementById('funil-usuarios-range'),
+          number: document.getElementById('funil-usuarios-number'),
+          current: document.getElementById('funil-usuarios-current'),
+          decimals: 0,
+          suffix: ''
+        },
+        convUL: {
+          range: document.getElementById('funil-conv-ul-range'),
+          number: document.getElementById('funil-conv-ul-number'),
+          current: document.getElementById('funil-conv-ul-current'),
+          decimals: 2,
+          suffix: '%'
+        },
+        convLV: {
+          range: document.getElementById('funil-conv-lv-range'),
+          number: document.getElementById('funil-conv-lv-number'),
+          current: document.getElementById('funil-conv-lv-current'),
+          decimals: 2,
+          suffix: '%'
+        },
+        mercado: {
+          range: document.getElementById('funil-mercado-range'),
+          number: document.getElementById('funil-mercado-number'),
+          current: document.getElementById('funil-mercado-current'),
+          decimals: 0,
+          suffix: ''
+        }
+      };
+
+      const funnelFormat = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+      const percentFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      function formatSimulatorValue(value, decimals, suffix = '') {
+        const formatted = new Intl.NumberFormat('pt-BR', {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals
+        }).format(value);
+        return `${formatted}${suffix}`;
+      }
+
+      function getSimulatorState() {
+        const usuarios = Number(simulatorConfig.usuarios.range.value);
+        const convUL = Number(simulatorConfig.convUL.range.value);
+        const convLV = Number(simulatorConfig.convLV.range.value);
+        const mercado = Number(simulatorConfig.mercado.range.value);
+        const leads = usuarios * (convUL / 100);
+        const vendas = leads * (convLV / 100);
+        const share = mercado > 0 ? (vendas / mercado) * 100 : 0;
+
+        return { usuarios, convUL, convLV, mercado, leads, vendas, share };
+      }
+
+      function updateSimulatorFunnel() {
+        const state = getSimulatorState();
+
+        Object.entries(simulatorConfig).forEach(([key, config]) => {
+          config.current.textContent = formatSimulatorValue(state[key], config.decimals, config.suffix);
+        });
+
+        document.getElementById('funil-leads-output').textContent = funnelFormat.format(Math.round(state.leads));
+        document.getElementById('funil-vendas-output').textContent = funnelFormat.format(Math.round(state.vendas));
+        document.getElementById('funil-share-output').textContent = `${percentFormat.format(state.share)}%`;
+
+        Plotly.react('funil-conversao-chart', [{
+          type: 'funnel',
+          y: ['Usuários', 'Leads', 'Vendas'],
+          x: [state.usuarios, state.leads, state.vendas],
+          textinfo: 'value+percent initial',
+          marker: { color: ['#00C16E', '#009A57', '#1A1A1A'] },
+          hovertemplate: '%{y}<br>%{x:,.0f}<extra></extra>'
+        }], {
+          margin: { t: 28, r: 24, b: 28, l: 90 },
+          paper_bgcolor: '#FFFFFF',
+          plot_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+
+        Plotly.react('funil-share-indicator', [{
+          type: 'indicator',
+          mode: 'number+gauge',
+          value: state.share,
+          title: { text: 'Vendas/Mercado' },
+          number: { suffix: '%', valueformat: '.2f' },
+          gauge: {
+            axis: { range: [0, 10], ticksuffix: '%' },
+            bar: { color: '#00C16E' },
+            bgcolor: '#F5F5F5',
+            bordercolor: '#E8E8E8',
+            steps: [
+              { range: [0, 4], color: '#FEE2E2' },
+              { range: [4, 6], color: '#FEF3C7' },
+              { range: [6, 10], color: '#D1FAE5' }
+            ]
+          }
+        }], {
+          margin: { t: 48, r: 28, b: 28, l: 28 },
+          paper_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+      }
+
+      Object.values(simulatorConfig).forEach(config => {
+        [config.range, config.number].forEach(input => {
+          input.addEventListener('input', event => {
+            const nextValue = event.target.value;
+            config.range.value = nextValue;
+            config.number.value = nextValue;
+            updateSimulatorFunnel();
+          });
+        });
+      });
+
+      updateSimulatorFunnel();
+
+      const shareSimulatorConfig = {
+        metaShare: {
+          range: document.getElementById('share-meta-range'),
+          number: document.getElementById('share-meta-number'),
+          current: document.getElementById('share-meta-current'),
+          decimals: 1,
+          suffix: '%'
+        },
+        mercadoMensal: {
+          range: document.getElementById('share-mercado-range'),
+          number: document.getElementById('share-mercado-number'),
+          current: document.getElementById('share-mercado-current'),
+          decimals: 0,
+          suffix: ''
+        },
+        vendasAtuais: {
+          range: document.getElementById('share-vendas-atuais-range'),
+          number: document.getElementById('share-vendas-atuais-number'),
+          current: document.getElementById('share-vendas-atuais-current'),
+          decimals: 0,
+          suffix: ''
+        },
+        linearCac: {
+          range: document.getElementById('share-linear-cac-range'),
+          number: document.getElementById('share-linear-cac-number'),
+          current: document.getElementById('share-linear-cac-current'),
+          decimals: 0,
+          prefix: 'R$ ',
+          suffix: ''
+        },
+        realistaCac: {
+          range: document.getElementById('share-realista-cac-range'),
+          number: document.getElementById('share-realista-cac-number'),
+          current: document.getElementById('share-realista-cac-current'),
+          decimals: 0,
+          prefix: 'R$ ',
+          suffix: ''
+        },
+        elasticidade: {
+          range: document.getElementById('share-elasticidade-range'),
+          number: document.getElementById('share-elasticidade-number'),
+          current: document.getElementById('share-elasticidade-current'),
+          decimals: 2,
+          suffix: ''
+        },
+        convAlvo: {
+          range: document.getElementById('share-conv-alvo-range'),
+          number: document.getElementById('share-conv-alvo-number'),
+          current: document.getElementById('share-conv-alvo-current'),
+          decimals: 1,
+          suffix: '%'
+        },
+        leadsAtuais: {
+          range: document.getElementById('share-leads-atuais-range'),
+          number: document.getElementById('share-leads-atuais-number'),
+          current: document.getElementById('share-leads-atuais-current'),
+          decimals: 0,
+          suffix: ''
+        },
+        sazonalGamma: {
+          range: document.getElementById('sazonalidade-gamma-range'),
+          number: document.getElementById('sazonalidade-gamma-number'),
+          current: document.getElementById('sazonalidade-gamma-current'),
+          decimals: 2,
+          suffix: ''
+        }
+      };
+
+      const currencyFormat = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0
+      });
+
+      const sazonalidadeStrategies = {
+        atual: 'Atual',
+        uniforme: 'Uniforme',
+        proporcional: 'Proporcional ao mercado'
+      };
+      const sazonalidadeDefaultBudget = 8060000;
+      const sazonalidadeTotalMercado = contextoMercado.reduce((sum, value) => sum + value, 0);
+      const sazonalidadeMercadoMedio = sazonalidadeTotalMercado / contextoMercado.length;
+
+      function getSazonalidadeStrategy() {
+        const select = document.getElementById('sazonal-strategy-select');
+        return select ? select.value : 'proporcional';
+      }
+
+      function getSazonalidadeAllocation(strategy, totalBudget) {
+        if (strategy === 'uniforme') {
+          return contextoMeses.map(() => totalBudget / contextoMeses.length);
+        }
+
+        const weightsSource = strategy === 'proporcional' ? contextoMercado : contextoInvestimento;
+        const weightsTotal = weightsSource.reduce((sum, value) => sum + value, 0);
+        return weightsSource.map(value => (value / weightsTotal) * totalBudget);
+      }
+
+      function getSazonalidadeCacs(gamma, baseCAC) {
+        return contextoMercado.map(mercado => baseCAC * ((sazonalidadeMercadoMedio / mercado) ** gamma));
+      }
+
+      function getSazonalidadeResult(strategy, gamma, totalBudget, baseCAC) {
+        const allocation = getSazonalidadeAllocation(strategy, totalBudget);
+        const cacs = getSazonalidadeCacs(gamma, baseCAC);
+        const monthlySales = allocation.map((investimento, index) => investimento / cacs[index]);
+        const totalSales = monthlySales.reduce((sum, value) => sum + value, 0);
+        const monthlyAverageSales = totalSales / contextoMeses.length;
+        const share = sazonalidadeTotalMercado > 0 ? (totalSales / sazonalidadeTotalMercado) * 100 : 0;
+
+        return { allocation, monthlySales, totalSales, monthlyAverageSales, share };
+      }
+
+      function getShareSimulatorState() {
+        const metaShare = Number(shareSimulatorConfig.metaShare.range.value);
+        const mercadoMensal = Number(shareSimulatorConfig.mercadoMensal.range.value);
+        const vendasAtuais = Number(shareSimulatorConfig.vendasAtuais.range.value);
+        const linearCac = Number(shareSimulatorConfig.linearCac.range.value);
+        const realistaCac = Number(shareSimulatorConfig.realistaCac.range.value);
+        const elasticidade = Number(shareSimulatorConfig.elasticidade.range.value);
+        const convAlvo = Number(shareSimulatorConfig.convAlvo.range.value);
+        const leadsAtuais = Number(shareSimulatorConfig.leadsAtuais.range.value);
+        const sazonalGamma = Number(shareSimulatorConfig.sazonalGamma.range.value);
+        const sazonalStrategy = getSazonalidadeStrategy();
+
+        const vendasAlvo = Math.ceil(mercadoMensal * (metaShare / 100));
+        const vendasIncrementais = Math.max(0, vendasAlvo - vendasAtuais);
+        const ratioEscala = vendasAtuais > 0 ? Math.max(1, vendasAlvo / vendasAtuais) : 1;
+        const expoenteElasticidade = elasticidade > 0 ? (1 - elasticidade) / elasticidade : 0;
+        const cacMarginalRealista = realistaCac * (ratioEscala ** expoenteElasticidade);
+        const linearInvestMensal = vendasIncrementais * linearCac;
+        const realistaInvestMensal = vendasIncrementais * cacMarginalRealista;
+        const vendasPorConversao = leadsAtuais * (convAlvo / 100);
+        const vendasEstrategicas = Math.max(vendasAtuais, vendasPorConversao);
+        const residualVendas = Math.max(0, vendasAlvo - vendasEstrategicas);
+        const estrategicoInvestMensal = residualVendas * linearCac;
+        const sazonalBaseCAC = sazonalidadeDefaultBudget / (Math.max(1, vendasAtuais) * contextoMeses.length);
+        const sazonalSelectedResult = getSazonalidadeResult(
+          sazonalStrategy,
+          sazonalGamma,
+          sazonalidadeDefaultBudget,
+          sazonalBaseCAC
+        );
+        const sazonalStrategyResults = Object.keys(sazonalidadeStrategies).map(key => ({
+          key,
+          label: sazonalidadeStrategies[key],
+          result: getSazonalidadeResult(key, sazonalGamma, sazonalidadeDefaultBudget, sazonalBaseCAC)
+        }));
+        const sazonalIncrementalAnual = sazonalSelectedResult.monthlyAverageSales >= vendasAlvo
+          ? 0
+          : ((vendasAlvo / Math.max(1, sazonalSelectedResult.monthlyAverageSales)) * sazonalidadeDefaultBudget)
+          - sazonalidadeDefaultBudget;
+
+        return {
+          metaShare,
+          mercadoMensal,
+          vendasAtuais,
+          linearCac,
+          realistaCac,
+          elasticidade,
+          convAlvo,
+          leadsAtuais,
+          vendasAlvo,
+          vendasIncrementais,
+          cacMarginalRealista,
+          linearInvestMensal,
+          realistaInvestMensal,
+          vendasPorConversao,
+          residualVendas,
+          estrategicoInvestMensal,
+          linearInvestAnual: linearInvestMensal * 12,
+          realistaInvestAnual: realistaInvestMensal * 12,
+          estrategicoInvestAnual: estrategicoInvestMensal * 12,
+          sazonalGamma,
+          sazonalStrategy,
+          sazonalBaseCAC,
+          sazonalSelectedResult,
+          sazonalStrategyResults,
+          sazonalIncrementalAnual
+        };
+      }
+
+      function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+      }
+
+      function updateShareSimulator() {
+        const state = getShareSimulatorState();
+
+        Object.entries(shareSimulatorConfig).forEach(([key, config]) => {
+          const prefix = config.prefix || '';
+          config.current.textContent = `${prefix}${formatSimulatorValue(state[key], config.decimals, config.suffix)}`;
+        });
+
+        const vendasAlvoLabel = funnelFormat.format(state.vendasAlvo);
+        setText('share-linear-vendas-alvo', vendasAlvoLabel);
+        setText('share-realista-vendas-alvo', vendasAlvoLabel);
+        setText('share-estrategico-vendas-alvo', vendasAlvoLabel);
+        setText('share-sazonal-vendas-alvo', vendasAlvoLabel);
+        setText('share-linear-invest-mensal', currencyFormat.format(state.linearInvestMensal));
+        setText('share-linear-invest-anual', currencyFormat.format(state.linearInvestAnual));
+        setText('share-realista-invest-mensal', currencyFormat.format(state.realistaInvestMensal));
+        setText('share-realista-invest-anual', currencyFormat.format(state.realistaInvestAnual));
+        setText('share-realista-cac-marginal', `CAC marginal: ${currencyFormat.format(state.cacMarginalRealista)}`);
+        setText('share-estrategico-vendas-conv', funnelFormat.format(Math.round(state.vendasPorConversao)));
+        setText('share-estrategico-invest-mensal', currencyFormat.format(state.estrategicoInvestMensal));
+        setText('share-sazonal-vendas-realocacao', funnelFormat.format(Math.round(state.sazonalSelectedResult.monthlyAverageSales)));
+        setText(
+          'share-sazonal-vendas-note',
+          `${funnelFormat.format(Math.round(state.sazonalSelectedResult.totalSales))} vendas na série de 13 meses.`
+        );
+        setText('share-sazonal-invest-anual', currencyFormat.format(state.sazonalIncrementalAnual));
+
+        const estrategicoNote = state.residualVendas <= 0
+          ? 'Meta coberta por eficiência de conversão.'
+          : `Faltam ${funnelFormat.format(Math.ceil(state.residualVendas))} vendas; residual anual: ${currencyFormat.format(state.estrategicoInvestAnual)}.`;
+        setText('share-estrategico-invest-note', estrategicoNote);
+
+        Plotly.react('share-investimento-anual-chart', [
+          {
+            x: ['Investimento anual incremental'],
+            y: [state.linearInvestAnual],
+            name: 'Linear',
+            type: 'bar',
+            marker: { color: '#00C16E' },
+            hovertemplate: 'Linear<br>R$ %{y:,.0f}/ano<extra></extra>'
+          },
+          {
+            x: ['Investimento anual incremental'],
+            y: [state.realistaInvestAnual],
+            name: 'Realista',
+            type: 'bar',
+            marker: { color: '#F97316' },
+            hovertemplate: 'Realista<br>R$ %{y:,.0f}/ano<extra></extra>'
+          },
+          {
+            x: ['Investimento anual incremental'],
+            y: [state.estrategicoInvestAnual],
+            name: 'Estratégico',
+            type: 'bar',
+            marker: { color: '#2563EB' },
+            hovertemplate: 'Estratégico<br>R$ %{y:,.0f}/ano<extra></extra>'
+          },
+          {
+            x: ['Investimento anual incremental'],
+            y: [state.sazonalIncrementalAnual],
+            name: 'Sazonal',
+            type: 'bar',
+            marker: { color: '#7C3AED' },
+            hovertemplate: 'Sazonal<br>R$ %{y:,.0f}/ano<extra></extra>'
+          }
+        ], {
+          barmode: 'group',
+          margin: { t: 34, r: 28, b: 48, l: 78 },
+          legend: { orientation: 'h', x: 0, y: 1.12 },
+          yaxis: {
+            title: 'R$/ano',
+            tickprefix: 'R$ ',
+            tickformat: ',.0f',
+            rangemode: 'tozero',
+            fixedrange: true,
+            gridcolor: '#E8E8E8'
+          },
+          xaxis: { fixedrange: true },
+          paper_bgcolor: '#FFFFFF',
+          plot_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+
+        Plotly.react('sazonalidade-alocacao-chart', [
+          {
+            x: contextoMeses,
+            y: state.sazonalSelectedResult.allocation,
+            name: 'Investimento alocado',
+            type: 'bar',
+            marker: { color: '#00C16E' },
+            hovertemplate: '%{x}<br>Investimento: R$ %{y:,.0f}<extra></extra>'
+          },
+          {
+            x: contextoMeses,
+            y: contextoMercado,
+            name: 'Mercado mensal',
+            type: 'bar',
+            yaxis: 'y2',
+            marker: { color: '#2563EB' },
+            hovertemplate: '%{x}<br>Mercado: %{y:,.0f} aberturas<extra></extra>'
+          }
+        ], {
+          barmode: 'group',
+          margin: { t: 34, r: 72, b: 72, l: 78 },
+          legend: { orientation: 'h', x: 0, y: 1.14 },
+          xaxis: { tickangle: -35, fixedrange: true },
+          yaxis: {
+            title: 'Investimento',
+            tickprefix: 'R$ ',
+            tickformat: ',.0f',
+            rangemode: 'tozero',
+            fixedrange: true,
+            gridcolor: '#E8E8E8'
+          },
+          yaxis2: {
+            title: 'Mercado',
+            overlaying: 'y',
+            side: 'right',
+            tickformat: ',.0f',
+            rangemode: 'tozero',
+            fixedrange: true,
+            showgrid: false
+          },
+          paper_bgcolor: '#FFFFFF',
+          plot_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+
+        Plotly.react('sazonalidade-estrategias-chart', [{
+          x: state.sazonalStrategyResults.map(item => item.label),
+          y: state.sazonalStrategyResults.map(item => item.result.totalSales),
+          type: 'bar',
+          marker: {
+            color: state.sazonalStrategyResults.map(item => item.key === state.sazonalStrategy ? '#00C16E' : '#9CA3AF')
+          },
+          hovertemplate: '%{x}<br>Vendas na série: %{y:,.0f}<extra></extra>'
+        }], {
+          margin: { t: 34, r: 24, b: 92, l: 72 },
+          xaxis: { tickangle: -28, fixedrange: true },
+          yaxis: {
+            title: 'Vendas na série',
+            tickformat: ',.0f',
+            rangemode: 'tozero',
+            fixedrange: true,
+            gridcolor: '#E8E8E8'
+          },
+          showlegend: false,
+          paper_bgcolor: '#FFFFFF',
+          plot_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+      }
+
+      Object.values(shareSimulatorConfig).forEach(config => {
+        [config.range, config.number].forEach(input => {
+          input.addEventListener('input', event => {
+            const nextValue = event.target.value;
+            config.range.value = nextValue;
+            config.number.value = nextValue;
+            updateShareSimulator();
+          });
+        });
+      });
+
+      const sazonalStrategyDescriptions = {
+        atual: 'Curva observada (R$ 250k → 974k).',
+        uniforme: 'Mesmo orçamento em todos os meses (~R$ 620k/mês).',
+        proporcional: 'Mais verba nos meses de maior abertura.'
+      };
+      const sazonalStrategySelectEl = document.getElementById('sazonal-strategy-select');
+      const sazonalStrategyDescEl = document.getElementById('sazonal-strategy-desc');
+      sazonalStrategySelectEl.addEventListener('change', event => {
+        sazonalStrategyDescEl.textContent = sazonalStrategyDescriptions[event.target.value] || '';
+        updateShareSimulator();
+      });
+
+      updateShareSimulator();
+
+      const elasticidadeSimulatorConfig = {
+        investimento: {
+          range: document.getElementById('elasticidade-investimento-range'),
+          number: document.getElementById('elasticidade-investimento-number'),
+          current: document.getElementById('elasticidade-investimento-current'),
+          decimals: 0,
+          prefix: 'R$ '
+        },
+        elasticidade: {
+          range: document.getElementById('elasticidade-range'),
+          number: document.getElementById('elasticidade-number'),
+          current: document.getElementById('elasticidade-current'),
+          decimals: 2,
+          prefix: ''
+        }
+      };
+
+      const elasticidadeBaseInvestimento = 974000;
+      const elasticidadeBaseCAC = 362.51;
+
+      function getElasticidadeCAC(investimento, elasticidade) {
+        const ratioInvestimento = investimento / elasticidadeBaseInvestimento;
+        return elasticidadeBaseCAC * (ratioInvestimento ** (1 - elasticidade));
+      }
+
+      function getElasticidadeSimulatorState() {
+        const investimento = Number(elasticidadeSimulatorConfig.investimento.range.value);
+        const elasticidade = Number(elasticidadeSimulatorConfig.elasticidade.range.value);
+        const cacProjetado = getElasticidadeCAC(investimento, elasticidade);
+        const cacLinear = elasticidadeBaseCAC;
+        const diferencaLinear = cacProjetado - cacLinear;
+
+        return { investimento, elasticidade, cacProjetado, cacLinear, diferencaLinear };
+      }
+
+      function updateElasticidadeSimulator() {
+        const state = getElasticidadeSimulatorState();
+
+        Object.entries(elasticidadeSimulatorConfig).forEach(([key, config]) => {
+          config.current.textContent = `${config.prefix}${formatSimulatorValue(state[key], config.decimals)}`;
+        });
+
+        setText('elasticidade-cac-projetado', currencyFormat.format(state.cacProjetado));
+        setText('elasticidade-cac-linear', currencyFormat.format(state.cacLinear));
+        setText('elasticidade-diferenca-linear', currencyFormat.format(state.diferencaLinear));
+
+        const curvaInvestimento = Array.from({ length: 120 }, (_, index) => 250000 + ((3000000 - 250000) * index / 119));
+        const curvaCAC = curvaInvestimento.map(value => getElasticidadeCAC(value, state.elasticidade));
+        const linearCAC = curvaInvestimento.map(() => state.cacLinear);
+
+        Plotly.react('elasticidade-investimento-cac-chart', [
+          {
+            x: contextoInvestimento,
+            y: funilCAC,
+            text: contextoMeses,
+            name: 'Meses reais',
+            type: 'scatter',
+            mode: 'markers',
+            marker: {
+              color: '#00C16E',
+              size: 10,
+              line: { color: '#009A57', width: 1.5 }
+            },
+            hovertemplate: '%{text}<br>Investimento: R$ %{x:,.0f}<br>CAC: R$ %{y:,.2f}<extra></extra>'
+          },
+          {
+            x: curvaInvestimento,
+            y: curvaCAC,
+            name: 'Curva com retornos decrescentes',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#F97316', width: 3 },
+            hovertemplate: 'Investimento: R$ %{x:,.0f}<br>CAC projetado: R$ %{y:,.2f}<extra></extra>'
+          },
+          {
+            x: curvaInvestimento,
+            y: linearCAC,
+            name: 'Linear ingênuo',
+            type: 'scatter',
+            mode: 'lines',
+            line: { color: '#1A1A1A', width: 2, dash: 'dot' },
+            hovertemplate: 'CAC linear: R$ %{y:,.2f}<extra></extra>'
+          },
+          {
+            x: [state.investimento],
+            y: [state.cacProjetado],
+            name: 'Investimento simulado',
+            type: 'scatter',
+            mode: 'markers',
+            marker: {
+              color: '#2563EB',
+              size: 14,
+              line: { color: '#1D4ED8', width: 2 }
+            },
+            hovertemplate: 'Simulado<br>Investimento: R$ %{x:,.0f}<br>CAC: R$ %{y:,.2f}<extra></extra>'
+          }
+        ], {
+          margin: { t: 34, r: 34, b: 58, l: 78 },
+          legend: { orientation: 'h', x: 0, y: 1.14 },
+          xaxis: {
+            title: 'Investimento mensal',
+            tickprefix: 'R$ ',
+            tickformat: ',.0f',
+            range: [220000, 3050000],
+            fixedrange: true,
+            gridcolor: '#E8E8E8'
+          },
+          yaxis: {
+            title: 'CAC',
+            tickprefix: 'R$ ',
+            tickformat: ',.0f',
+            rangemode: 'tozero',
+            fixedrange: true,
+            gridcolor: '#E8E8E8'
+          },
+          hovermode: 'closest',
+          paper_bgcolor: '#FFFFFF',
+          plot_bgcolor: '#FFFFFF',
+          font: { family: 'Segoe UI, system-ui, -apple-system, sans-serif', color: '#3D3D3D' }
+        }, { responsive: true, displayModeBar: false });
+      }
+
+      Object.values(elasticidadeSimulatorConfig).forEach(config => {
+        [config.range, config.number].forEach(input => {
+          input.addEventListener('input', event => {
+            const nextValue = event.target.value;
+            config.range.value = nextValue;
+            config.number.value = nextValue;
+            updateElasticidadeSimulator();
+          });
+        });
+      });
+
+      updateElasticidadeSimulator();
+
+      /* Marca o link ativo na nav conforme scroll */
+      const links = document.querySelectorAll('nav a[href^="#"]');
+      const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href')));
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            links.forEach(l => l.classList.remove('active'));
+            const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+            if (active) active.classList.add('active');
+          }
+        });
+      }, { threshold: 0.35 });
+
+      sections.forEach(s => { if (s) observer.observe(s); });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCasePS);
+    } else {
+      initCasePS();
+    }
+  </script>
+
+</body>
+
+</html>
