@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/Case_PS/Entrega/index.html" }
   ]
